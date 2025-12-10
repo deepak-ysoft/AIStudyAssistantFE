@@ -1,4 +1,4 @@
-import { Navigate, createBrowserRouter } from 'react-router-dom';
+import { Navigate, createBrowserRouter, Outlet } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 import MainLayout from '../layouts/MainLayout';
@@ -18,89 +18,115 @@ import StudyPlannerPage from '../pages/StudyPlanner/StudyPlannerPage';
 import PomodoroPage from '../pages/Pomodoro/PomodoroPage';
 import ReportsPage from '../pages/Reports/ReportsPage';
 
-function ProtectedRoute({ children }) {
-  const { isAuthenticated, loading } = useAuth();
-
-  if (loading) {
-    return <div className="flex items-center justify-center h-screen">Loading...</div>;
-  }
-
-  return isAuthenticated ? children : <Navigate to="/login" />;
+function ErrorFallback() {
+  return (
+    <div className="flex items-center justify-center h-screen bg-base-100">
+      <div className="text-center">
+        <h1 className="text-4xl font-bold mb-4">Oops! Something went wrong</h1>
+        <p className="text-lg text-base-content/70 mb-6">Please try again or contact support</p>
+        <a href="/" className="btn btn-primary">Go Home</a>
+      </div>
+    </div>
+  );
 }
 
-function PublicRoute({ children }) {
+function ProtectedLayout() {
   const { isAuthenticated, loading } = useAuth();
 
   if (loading) {
     return <div className="flex items-center justify-center h-screen">Loading...</div>;
   }
 
-  return isAuthenticated ? <Navigate to="/dashboard" /> : children;
+  if (!isAuthenticated) {
+    return <Navigate to="/auth/login" replace />;
+  }
+
+  return <MainLayout />;
+}
+
+function PublicLayout() {
+  const { isAuthenticated, loading } = useAuth();
+
+  if (loading) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  }
+
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return <AuthLayout />;
 }
 
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <Navigate to="/dashboard" />,
+    errorElement: <ErrorFallback />,
+    element: <Navigate to="/dashboard" replace />,
   },
   {
-    path: '/auth',
-    element: <AuthLayout />,
+    path: 'auth',
+    element: <PublicLayout />,
+    errorElement: <ErrorFallback />,
     children: [
       {
         path: 'login',
-        element: <PublicRoute><LoginPage /></PublicRoute>,
+        element: <LoginPage />,
       },
       {
         path: 'signup',
-        element: <PublicRoute><SignupPage /></PublicRoute>,
+        element: <SignupPage />,
       },
       {
         path: 'forgot-password',
-        element: <PublicRoute><ForgotPasswordPage /></PublicRoute>,
+        element: <ForgotPasswordPage />,
       },
     ],
   },
   {
-    path: '/',
-    element: <MainLayout />,
+    element: <ProtectedLayout />,
+    errorElement: <ErrorFallback />,
     children: [
       {
         path: 'dashboard',
-        element: <ProtectedRoute><Dashboard /></ProtectedRoute>,
+        element: <Dashboard />,
       },
       {
         path: 'subjects',
-        element: <ProtectedRoute><SubjectsPage /></ProtectedRoute>,
+        element: <SubjectsPage />,
       },
       {
         path: 'notes',
-        element: <ProtectedRoute><NotesPage /></ProtectedRoute>,
+        element: <NotesPage />,
       },
       {
         path: 'flashcards',
-        element: <ProtectedRoute><FlashcardsPage /></ProtectedRoute>,
+        element: <FlashcardsPage />,
       },
       {
         path: 'quizzes',
-        element: <ProtectedRoute><QuizzesPage /></ProtectedRoute>,
+        element: <QuizzesPage />,
       },
       {
         path: 'ai-chat',
-        element: <ProtectedRoute><AIChatPage /></ProtectedRoute>,
+        element: <AIChatPage />,
       },
       {
         path: 'study-planner',
-        element: <ProtectedRoute><StudyPlannerPage /></ProtectedRoute>,
+        element: <StudyPlannerPage />,
       },
       {
         path: 'pomodoro',
-        element: <ProtectedRoute><PomodoroPage /></ProtectedRoute>,
+        element: <PomodoroPage />,
       },
       {
         path: 'reports',
-        element: <ProtectedRoute><ReportsPage /></ProtectedRoute>,
+        element: <ReportsPage />,
       },
     ],
+  },
+  {
+    path: '*',
+    element: <ErrorFallback />,
   },
 ]);
