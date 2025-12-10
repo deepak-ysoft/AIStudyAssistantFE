@@ -1,16 +1,18 @@
-import { useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
-import { aiApi } from '../../api/aiApi';
+import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { aiApi } from "../../api/aiApi";
+import { MdCalendarToday } from "react-icons/md";
 
 export default function StudyPlannerPage() {
   const [formData, setFormData] = useState({
-    availableHours: '',
+    availableHours: "",
     subjects: [],
   });
   const [plan, setPlan] = useState(null);
 
   const generatePlanMutation = useMutation({
-    mutationFn: (data) => aiApi.generateStudyPlan(data.availableHours, data.subjects),
+    mutationFn: (data) =>
+      aiApi.generateStudyPlan(data.availableHours, data.subjects),
     onSuccess: (response) => {
       setPlan(response.data?.data?.plan);
     },
@@ -24,7 +26,9 @@ export default function StudyPlannerPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">📅 Study Planner</h1>
+        <h1 className="text-3xl font-bold flex items-center gap-2">
+          <MdCalendarToday className="text-blue-600" /> Study Planner
+        </h1>
         <p className="text-base-content/70">
           Get AI-powered personalized study schedules
         </p>
@@ -65,7 +69,9 @@ export default function StudyPlannerPage() {
                     onChange={(e) =>
                       setFormData({
                         ...formData,
-                        subjects: e.target.value.split(',').map((s) => s.trim()),
+                        subjects: e.target.value
+                          .split(",")
+                          .map((s) => s.trim()),
                       })
                     }
                   />
@@ -76,8 +82,8 @@ export default function StudyPlannerPage() {
                   disabled={generatePlanMutation.isPending}
                 >
                   {generatePlanMutation.isPending
-                    ? 'Generating...'
-                    : 'Generate Plan'}
+                    ? "Generating..."
+                    : "Generate Plan"}
                 </button>
               </form>
             </div>

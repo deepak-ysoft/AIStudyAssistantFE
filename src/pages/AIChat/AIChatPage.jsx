@@ -1,16 +1,17 @@
-import { useState, useRef, useEffect } from 'react';
-import { useMutation } from '@tanstack/react-query';
-import { aiApi } from '../../api/aiApi';
+import { useState, useRef, useEffect } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { aiApi } from "../../api/aiApi";
+import { MdSmartToy } from "react-icons/md";
 
 export default function AIChatPage() {
   const [messages, setMessages] = useState([
     {
       id: 1,
-      text: 'Hello! I\'m your AI Study Assistant. Ask me anything about your studies!',
-      sender: 'ai',
+      text: "Hello! I'm your AI Study Assistant. Ask me anything about your studies!",
+      sender: "ai",
     },
   ]);
-  const [inputValue, setInputValue] = useState('');
+  const [inputValue, setInputValue] = useState("");
   const messagesEndRef = useRef(null);
 
   const chatMutation = useMutation({
@@ -20,14 +21,14 @@ export default function AIChatPage() {
       if (aiMessage) {
         setMessages((prev) => [
           ...prev,
-          { id: Date.now(), text: aiMessage, sender: 'ai' },
+          { id: Date.now(), text: aiMessage, sender: "ai" },
         ]);
       }
     },
   });
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   const handleSendMessage = (e) => {
@@ -37,18 +38,20 @@ export default function AIChatPage() {
     const userMessage = {
       id: Date.now(),
       text: inputValue,
-      sender: 'user',
+      sender: "user",
     };
 
     setMessages((prev) => [...prev, userMessage]);
     chatMutation.mutate(inputValue);
-    setInputValue('');
+    setInputValue("");
   };
 
   return (
     <div className="space-y-6 h-full flex flex-col">
       <div>
-        <h1 className="text-3xl font-bold">💬 AI Chat Assistant</h1>
+        <h1 className="text-3xl font-bold flex items-center gap-2">
+          <MdSmartToy className="text-blue-600" /> AI Chat Assistant
+        </h1>
         <p className="text-base-content/70">
           Ask questions and get instant help with your studies
         </p>
@@ -59,14 +62,14 @@ export default function AIChatPage() {
           <div
             key={message.id}
             className={`flex ${
-              message.sender === 'user' ? 'justify-end' : 'justify-start'
+              message.sender === "user" ? "justify-end" : "justify-start"
             }`}
           >
             <div
               className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                message.sender === 'user'
-                  ? 'bg-primary text-primary-content'
-                  : 'bg-base-300'
+                message.sender === "user"
+                  ? "bg-primary text-primary-content"
+                  : "bg-base-300"
               }`}
             >
               <p>{message.text}</p>

@@ -1,13 +1,18 @@
-import { useState } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { subjectsApi } from '../../api/subjectsApi';
+import { useState } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { subjectsApi } from "../../api/subjectsApi";
+import { MdBook } from "react-icons/md";
 
 export default function SubjectsPage() {
   const [showModal, setShowModal] = useState(false);
-  const [formData, setFormData] = useState({ name: '', description: '' });
+  const [formData, setFormData] = useState({ name: "", description: "" });
 
-  const { data: subjects = [], isLoading, refetch } = useQuery({
-    queryKey: ['subjects'],
+  const {
+    data: subjects = [],
+    isLoading,
+    refetch,
+  } = useQuery({
+    queryKey: ["subjects"],
     queryFn: () => subjectsApi.getAll(),
     select: (response) => response.data?.data || [],
   });
@@ -16,7 +21,7 @@ export default function SubjectsPage() {
     mutationFn: (data) => subjectsApi.create(data),
     onSuccess: () => {
       setShowModal(false);
-      setFormData({ name: '', description: '' });
+      setFormData({ name: "", description: "" });
       refetch();
     },
   });
@@ -30,13 +35,12 @@ export default function SubjectsPage() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold">📚 Subjects</h1>
+          <h1 className="text-3xl font-bold flex items-center gap-2">
+            <MdBook className="text-blue-600" /> Subjects
+          </h1>
           <p className="text-base-content/70">Manage your study subjects</p>
         </div>
-        <button
-          className="btn btn-primary"
-          onClick={() => setShowModal(true)}
-        >
+        <button className="btn btn-primary" onClick={() => setShowModal(true)}>
           + Add Subject
         </button>
       </div>
@@ -49,7 +53,10 @@ export default function SubjectsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {subjects.length > 0 ? (
             subjects.map((subject) => (
-              <div key={subject._id} className="card bg-base-200 shadow-md hover:shadow-lg transition">
+              <div
+                key={subject._id}
+                className="card bg-base-200 shadow-md hover:shadow-lg transition"
+              >
                 <div className="card-body">
                   <h2 className="card-title">{subject.name}</h2>
                   <p className="text-sm text-base-content/70">
@@ -57,7 +64,9 @@ export default function SubjectsPage() {
                   </p>
                   <div className="card-actions justify-end mt-4">
                     <button className="btn btn-sm btn-ghost">View</button>
-                    <button className="btn btn-sm btn-ghost text-error">Delete</button>
+                    <button className="btn btn-sm btn-ghost text-error">
+                      Delete
+                    </button>
                   </div>
                 </div>
               </div>
@@ -118,7 +127,7 @@ export default function SubjectsPage() {
                   className="btn btn-primary"
                   disabled={createMutation.isPending}
                 >
-                  {createMutation.isPending ? 'Creating...' : 'Create'}
+                  {createMutation.isPending ? "Creating..." : "Create"}
                 </button>
               </div>
             </form>

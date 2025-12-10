@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
+import { MdTimer } from "react-icons/md";
 
 export default function PomodoroPage() {
   const WORK_TIME = 25 * 60;
@@ -40,7 +41,9 @@ export default function PomodoroPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">⏱️ Pomodoro Timer</h1>
+        <h1 className="text-3xl font-bold flex items-center gap-2">
+          <MdTimer className="text-blue-600" /> Pomodoro Timer
+        </h1>
         <p className="text-base-content/70">
           Stay focused with the Pomodoro Technique
         </p>
@@ -50,17 +53,17 @@ export default function PomodoroPage() {
         <div className="card bg-gradient-to-r from-primary to-secondary shadow-xl p-8">
           <div className="card-body text-center">
             <h2 className="text-primary-content mb-4 text-2xl font-bold">
-              {isWorkTime ? 'Focus Time' : 'Break Time'}
+              {isWorkTime ? "Focus Time" : "Break Time"}
             </h2>
             <div className="text-6xl font-bold text-primary-content mb-8 font-mono">
-              {String(minutes).padStart(2, '0')}:{String(secs).padStart(2, '0')}
+              {String(minutes).padStart(2, "0")}:{String(secs).padStart(2, "0")}
             </div>
             <div className="flex gap-4 justify-center mb-6">
               <button
                 onClick={toggleTimer}
                 className="btn btn-lg btn-outline text-primary-content border-primary-content hover:bg-primary-content hover:text-primary"
               >
-                {isActive ? 'Pause' : 'Start'}
+                {isActive ? "Pause" : "Start"}
               </button>
               <button
                 onClick={resetTimer}

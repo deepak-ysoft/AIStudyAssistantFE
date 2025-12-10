@@ -1,17 +1,22 @@
-import { useState } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { notesApi } from '../../api/notesApi';
+import { useState } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { notesApi } from "../../api/notesApi";
+import { MdNotes } from "react-icons/md";
 
 export default function NotesPage() {
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({
-    title: '',
-    content: '',
-    subject: '',
+    title: "",
+    content: "",
+    subject: "",
   });
 
-  const { data: notes = [], isLoading, refetch } = useQuery({
-    queryKey: ['notes'],
+  const {
+    data: notes = [],
+    isLoading,
+    refetch,
+  } = useQuery({
+    queryKey: ["notes"],
     queryFn: () => notesApi.getAll(),
     select: (response) => response.data?.data || [],
   });
@@ -20,7 +25,7 @@ export default function NotesPage() {
     mutationFn: (data) => notesApi.create(data),
     onSuccess: () => {
       setShowModal(false);
-      setFormData({ title: '', content: '', subject: '' });
+      setFormData({ title: "", content: "", subject: "" });
       refetch();
     },
   });
@@ -34,8 +39,12 @@ export default function NotesPage() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold">📝 Notes</h1>
-          <p className="text-base-content/70">Create and manage your study notes</p>
+          <h1 className="text-3xl font-bold flex items-center gap-2">
+            <MdNotes className="text-blue-600" /> Notes
+          </h1>
+          <p className="text-base-content/70">
+            Create and manage your study notes
+          </p>
         </div>
         <div className="flex gap-2">
           <button className="btn btn-secondary">Upload PDF</button>
@@ -66,9 +75,7 @@ export default function NotesPage() {
                       </p>
                       <div className="flex gap-2 mt-3">
                         <span className="badge">View</span>
-                        <span className="badge badge-secondary">
-                          Summarize
-                        </span>
+                        <span className="badge badge-secondary">Summarize</span>
                       </div>
                     </div>
                     <div className="flex gap-2">
@@ -151,7 +158,7 @@ export default function NotesPage() {
                   className="btn btn-primary"
                   disabled={createMutation.isPending}
                 >
-                  {createMutation.isPending ? 'Creating...' : 'Create'}
+                  {createMutation.isPending ? "Creating..." : "Create"}
                 </button>
               </div>
             </form>

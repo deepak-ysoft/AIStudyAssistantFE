@@ -1,9 +1,18 @@
-import { useState } from 'react';
+import { useState } from "react";
+import { MdCardGiftcard } from "react-icons/md";
 
 export default function FlashcardsPage() {
   const [flashcards] = useState([
-    { id: 1, question: 'What is photosynthesis?', answer: 'Process of converting light energy into chemical energy' },
-    { id: 2, question: 'What is mitochondria?', answer: 'Powerhouse of the cell' },
+    {
+      id: 1,
+      question: "What is photosynthesis?",
+      answer: "Process of converting light energy into chemical energy",
+    },
+    {
+      id: 2,
+      question: "What is mitochondria?",
+      answer: "Powerhouse of the cell",
+    },
   ]);
 
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -27,8 +36,12 @@ export default function FlashcardsPage() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold">🎴 Flashcards</h1>
-          <p className="text-base-content/70">Learn with interactive flashcards</p>
+          <h1 className="text-3xl font-bold flex items-center gap-2">
+            <MdCardGiftcard className="text-blue-600" /> Flashcards
+          </h1>
+          <p className="text-base-content/70">
+            Learn with interactive flashcards
+          </p>
         </div>
         <button className="btn btn-primary">+ Create Set</button>
       </div>
@@ -43,7 +56,8 @@ export default function FlashcardsPage() {
               <div className="card-body flex items-center justify-center min-h-64">
                 <div className="text-center">
                   <p className="text-sm text-base-100/70 mb-4">
-                    {isFlipped ? 'Answer' : 'Question'} ({currentIndex + 1}/{flashcards.length})
+                    {isFlipped ? "Answer" : "Question"} ({currentIndex + 1}/
+                    {flashcards.length})
                   </p>
                   <p className="text-2xl font-bold text-base-100">
                     {isFlipped
