@@ -131,7 +131,7 @@ export default function FlashcardsPage() {
   return (
     <div>
       {/* HEADER */}
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2">
             <MdCardGiftcard className="text-blue-600" /> Flashcards
@@ -152,7 +152,7 @@ export default function FlashcardsPage() {
           <span className="loading loading-spinner loading-lg" />
         </div>
       ) : flashcards.length ? (
-        <div className="space-y-6 mt-6">
+        <div className="space-y-6">
           {/* CARD */}
           <div
             className="h-64 flex items-center justify-center cursor-pointer"

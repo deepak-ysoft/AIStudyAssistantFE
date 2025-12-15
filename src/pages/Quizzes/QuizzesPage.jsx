@@ -168,7 +168,7 @@ export default function QuizzesPage() {
   return (
     <div>
       {/* HEADER */}
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2">
             <MdQuiz className="text-blue-600" /> Quizzes
@@ -189,7 +189,7 @@ export default function QuizzesPage() {
           <span className="loading loading-spinner loading-lg" />
         </div>
       ) : quizzes.length ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4  mt-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {quizzes.map((quiz) => (
             <div
               key={quiz._id}

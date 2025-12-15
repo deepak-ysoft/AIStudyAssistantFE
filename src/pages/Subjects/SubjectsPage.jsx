@@ -91,7 +91,7 @@ export default function SubjectsPage() {
   return (
     <div>
       {/* HEADER */}
-      <div className="flex justify-between items-center ">
+      <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2">
             <MdBook className="text-blue-600" /> Subjects
@@ -108,8 +108,12 @@ export default function SubjectsPage() {
         <div className="flex justify-center py-20">
           <span className="loading loading-spinner loading-lg" />
         </div>
+      ) : subjects.length === 0 ? (
+        <div className="text-center py-12 bg-base-200 rounded-lg">
+          No subjects found
+        </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {subjects.map((subject) => (
             <div
               key={subject._id}

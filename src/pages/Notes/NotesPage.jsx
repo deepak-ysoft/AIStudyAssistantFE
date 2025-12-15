@@ -118,9 +118,9 @@ export default function NotesPage() {
   /* ------------------ UI ------------------ */
 
   return (
-    <div >
+    <div>
       {/* HEADER */}
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2">
             <MdNotes className="text-blue-600" /> Notes
