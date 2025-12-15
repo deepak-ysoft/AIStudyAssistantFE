@@ -89,9 +89,9 @@ export default function SubjectsPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div>
       {/* HEADER */}
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center ">
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2">
             <MdBook className="text-blue-600" /> Subjects
@@ -109,7 +109,7 @@ export default function SubjectsPage() {
           <span className="loading loading-spinner loading-lg" />
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
           {subjects.map((subject) => (
             <div
               key={subject._id}

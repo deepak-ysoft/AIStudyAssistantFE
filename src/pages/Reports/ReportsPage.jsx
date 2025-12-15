@@ -20,7 +20,7 @@ export default function ReportsPage() {
   });
 
   return (
-    <div className="space-y-6">
+    <div>
       <div>
         <h1 className="text-3xl font-bold flex items-center gap-2">
           <MdAssessment className="text-blue-600" /> Performance Reports
@@ -30,7 +30,7 @@ export default function ReportsPage() {
         </p>
       </div>
 
-      <div className="flex gap-2">
+      <div className="flex gap-2  mt-6">
         <button
           onClick={() => setReportType("weekly")}
           className={`btn ${
@@ -54,7 +54,7 @@ export default function ReportsPage() {
           <span className="loading loading-spinner loading-lg"></span>
         </div>
       ) : error ? (
-        <div className="alert alert-error">
+        <div className="alert alert-error  mt-6">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             className="stroke-current shrink-0 h-6 w-6"
@@ -71,7 +71,7 @@ export default function ReportsPage() {
           <span>Failed to load reports. Please try again.</span>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4  mt-6">
           <div className="card bg-base-200 shadow-md">
             <div className="card-body">
               <h2 className="card-title text-sm">Study Hours</h2>
@@ -107,7 +107,7 @@ export default function ReportsPage() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6  mt-6">
         <div className="card bg-base-200 shadow-md">
           <div className="card-body">
             <h2 className="card-title">Subject Performance</h2>
@@ -138,7 +138,7 @@ export default function ReportsPage() {
           </div>
         </div>
 
-        <div className="card bg-base-200 shadow-md">
+        <div className="card bg-base-200 shadow-md ">
           <div className="card-body">
             <h2 className="card-title">Recommendations</h2>
             <ul className="space-y-2 text-sm">
@@ -151,7 +151,7 @@ export default function ReportsPage() {
         </div>
       </div>
 
-      <div className="card bg-base-200 shadow-md">
+      <div className="card bg-base-200 shadow-md  mt-6">
         <div className="card-body">
           <h2 className="card-title mb-4">Weekly Insights</h2>
           <p className="text-base-content/70 mb-4">

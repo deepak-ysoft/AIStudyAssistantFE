@@ -39,7 +39,7 @@ export default function PomodoroPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div>
       <div>
         <h1 className="text-3xl font-bold flex items-center gap-2">
           <MdTimer className="text-blue-600" /> Pomodoro Timer
@@ -49,7 +49,7 @@ export default function PomodoroPage() {
         </p>
       </div>
 
-      <div className="flex justify-center items-center">
+      <div className="flex justify-center items-center mt-6">
         <div className="card bg-gradient-to-r from-primary to-secondary shadow-xl p-8">
           <div className="card-body text-center">
             <h2 className="text-primary-content mb-4 text-2xl font-bold">
@@ -79,7 +79,7 @@ export default function PomodoroPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6  mt-6">
         <div className="card bg-base-200 shadow-md">
           <div className="card-body">
             <h2 className="card-title">Today's Stats</h2>

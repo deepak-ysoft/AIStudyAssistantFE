@@ -24,7 +24,7 @@ export default function StudyPlannerPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div>
       <div>
         <h1 className="text-3xl font-bold flex items-center gap-2">
           <MdCalendarToday className="text-blue-600" /> Study Planner
@@ -34,7 +34,7 @@ export default function StudyPlannerPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6  mt-6">
         <div className="lg:col-span-1">
           <div className="card bg-base-200 shadow-md">
             <div className="card-body">

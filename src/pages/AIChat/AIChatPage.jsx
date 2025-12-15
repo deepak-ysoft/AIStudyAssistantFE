@@ -47,7 +47,7 @@ export default function AIChatPage() {
   };
 
   return (
-    <div className="space-y-6 h-full flex flex-col">
+    <div className="h-full flex flex-col">
       <div>
         <h1 className="text-3xl font-bold flex items-center gap-2">
           <MdSmartToy className="text-blue-600" /> AI Chat Assistant
@@ -57,7 +57,7 @@ export default function AIChatPage() {
         </p>
       </div>
 
-      <div className="flex-1 bg-base-200 rounded-lg p-4 overflow-y-auto space-y-4">
+      <div className="flex-1 bg-base-200 rounded-lg p-4 overflow-y-auto space-y-4  mt-6">
         {messages.map((message) => (
           <div
             key={message.id}
@@ -86,7 +86,7 @@ export default function AIChatPage() {
         <div ref={messagesEndRef} />
       </div>
 
-      <form onSubmit={handleSendMessage} className="flex gap-2">
+      <form onSubmit={handleSendMessage} className="flex gap-2 mt-6">
         <input
           type="text"
           placeholder="Ask anything..."
