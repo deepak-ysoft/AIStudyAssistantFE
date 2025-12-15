@@ -26,21 +26,39 @@ const navItems = [
 export default function Sidebar() {
   const location = useLocation();
 
+  const closeDrawer = () => {
+    const drawer = document.getElementById("main-drawer");
+    if (drawer) drawer.checked = false;
+  };
+
   return (
-    <aside className="w-64 bg-base-200 border-r border-base-300 overflow-y-auto">
-      <ul className="menu p-4 w-full">
+    <aside className="w-64 min-h-full bg-base-100 border-r border-base-300">
+      {/* LOGO */}
+      <div className="flex items-center gap-2 p-4 m-0.5 bg-base-200 shadow-md">
+        <MdBook className="text-2xl text-green-600 " />
+        <span className="text-lg font-semibold">AI Study Assistant</span>
+      </div>
+
+      {/* NAV */}
+      <ul className="menu p-4 space-y-1">
         {navItems.map((item) => {
           const Icon = item.icon;
+          const isActive = location.pathname === item.path;
+
           return (
             <li key={item.path}>
               <Link
                 to={item.path}
-                className={`flex items-center gap-3 ${
-                  location.pathname === item.path ? "active" : ""
-                }`}
+                onClick={closeDrawer}
+                className={`flex items-center gap-3 rounded-lg
+                  ${
+                    isActive
+                      ? "bg-primary text-primary-content"
+                      : "hover:bg-base-200"
+                  }`}
               >
-                <Icon className="text-xl text-primary" />
-                <span>{item.label}</span>
+                <Icon className="text-xl" />
+                <span className="font-medium">{item.label}</span>
               </Link>
             </li>
           );

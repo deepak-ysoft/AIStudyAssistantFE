@@ -1,7 +1,7 @@
 import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
 import { useNavigate } from "react-router-dom";
-import { MdBook, MdDarkMode, MdLightMode } from "react-icons/md";
+import { MdBook, MdDarkMode, MdLightMode, MdMenu } from "react-icons/md";
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -14,30 +14,33 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="navbar bg-base-200 sticky top-0 z-50 shadow-md">
-      <div className="flex-1">
-        <a className="btn btn-ghost normal-case text-xl flex items-center gap-2">
-          <MdBook className="text-2xl text-blue-600" />
-          AI Study Assistant
-        </a>
-      </div>
-      <div className="flex-none gap-2">
+    <nav className="navbar bg-base-200 sticky top-0 z-40 shadow-md flex-shrink-0 px-4 md:px-6 min-h-16">
+      <label
+        htmlFor="main-drawer"
+        className="btn btn-ghost btn-circle md:hidden"
+      >
+        <MdMenu className="text-xl" />
+      </label>
+      <div className="flex-none gap-4 ml-auto">
         <button
           onClick={toggleTheme}
-          className="btn btn-ghost btn-circle"
-          title="Toggle theme"
+          className="btn btn-ghost btn-circle btn-sm md:btn-md"
+          title={`Theme: ${theme}`}
         >
-          {theme === "light" ? (
-            <MdDarkMode className="text-xl" />
+          {["dark", "dracula", "synthwave", "cyberpunk"].includes(theme) ? (
+            <MdLightMode className="text-lg md:text-xl" />
           ) : (
-            <MdLightMode className="text-xl" />
+            <MdDarkMode className="text-lg md:text-xl" />
           )}
         </button>
 
         {user && (
           <div className="dropdown dropdown-end">
-            <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
-              <div className="w-10 rounded-full bg-primary text-primary-content flex items-center justify-center font-bold">
+            <label
+              tabIndex={0}
+              className="btn btn-ghost btn-circle avatar btn-sm md:btn-md"
+            >
+              <div className="w-8 md:w-10 rounded-full bg-primary text-primary-content flex items-center justify-center font-bold text-sm md:text-base">
                 {user.name?.charAt(0) || "U"}
               </div>
             </label>
@@ -47,8 +50,8 @@ export default function Navbar() {
             >
               <li>
                 <a className="justify-between">
-                  {user.email}
-                  <span className="badge">Profile</span>
+                  <span className="truncate">{user.email}</span>
+                  <span className="badge badge-sm">Profile</span>
                 </a>
               </li>
               <li>

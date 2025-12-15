@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { notesApi } from "../../api/notesApi";
 import { MdNotes } from "react-icons/md";
+import { subjectsApi } from "../../api/subjectsApi";
 
 export default function NotesPage() {
   const [showModal, setShowModal] = useState(false);
@@ -20,6 +21,21 @@ export default function NotesPage() {
     queryFn: () => notesApi.getAll(),
     select: (response) => response.data?.data || [],
   });
+
+  const {
+    data: subjects = [],
+    isLoading: isSubjectsLoading,
+    refetch: refetchSubjects,
+  } = useQuery({
+    queryKey: ["subjects"],
+    queryFn: () => subjectsApi.getAll(),
+    select: (response) => response.data?.data || [],
+  });
+
+  var options = subjects.map((subject) => ({
+    value: subject._id,
+    label: subject.name,
+  }));
 
   const createMutation = useMutation({
     mutationFn: (data) => notesApi.create(data),
@@ -135,15 +151,24 @@ export default function NotesPage() {
                 <label className="label">
                   <span className="label-text">Subject</span>
                 </label>
-                <input
-                  type="text"
-                  placeholder="Select subject..."
-                  className="input input-bordered"
+                <select
+                  name={formData.subject}
+                  id=""
+                  className="select select-bordered"
                   value={formData.subject}
                   onChange={(e) =>
                     setFormData({ ...formData, subject: e.target.value })
                   }
-                />
+                >
+                  <option value="" disabled>
+                    Select Subject
+                  </option>
+                  {options.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div className="modal-action">
                 <button
