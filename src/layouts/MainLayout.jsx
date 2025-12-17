@@ -1,6 +1,6 @@
 import { Outlet } from "react-router-dom";
-import Navbar from "../components/common/Navbar";
-import Sidebar from "../components/common/Sidebar";
+import Navbar from "../components/Navbar";
+import Sidebar from "../components/Sidebar";
 
 export default function MainLayout() {
   return (
@@ -20,7 +20,7 @@ export default function MainLayout() {
       </div>
 
       {/* SIDEBAR */}
-      <div className="drawer-side z-50">
+      <div className="drawer-side z-40">
         <label htmlFor="main-drawer" className="drawer-overlay" />
         <Sidebar />
       </div>

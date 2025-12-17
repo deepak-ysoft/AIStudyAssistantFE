@@ -42,7 +42,7 @@ export default function PomodoroPage() {
     <div>
       <div>
         <h1 className="text-3xl font-bold flex items-center gap-2">
-          <MdTimer className="text-blue-600" /> Pomodoro Timer
+          <MdTimer className="text-primary" /> Pomodoro Timer
         </h1>
         <p className="text-base-content/70">
           Stay focused with the Pomodoro Technique

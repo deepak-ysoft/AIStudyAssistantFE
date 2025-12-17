@@ -23,7 +23,7 @@ export default function ReportsPage() {
     <div>
       <div>
         <h1 className="text-3xl font-bold flex items-center gap-2">
-          <MdAssessment className="text-blue-600" /> Performance Reports
+          <MdAssessment className="text-primary" /> Performance Reports
         </h1>
         <p className="text-base-content/70">
           Track your learning progress and improvements
@@ -33,7 +33,7 @@ export default function ReportsPage() {
       <div className="flex gap-2  mt-6">
         <button
           onClick={() => setReportType("weekly")}
-          className={`btn ${
+          className={`btn tab ${
             reportType === "weekly" ? "btn-primary" : "btn-ghost"
           }`}
         >

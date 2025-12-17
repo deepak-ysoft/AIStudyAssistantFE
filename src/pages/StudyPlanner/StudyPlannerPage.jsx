@@ -27,7 +27,7 @@ export default function StudyPlannerPage() {
     <div>
       <div>
         <h1 className="text-3xl font-bold flex items-center gap-2">
-          <MdCalendarToday className="text-blue-600" /> Study Planner
+          <MdCalendarToday className="text-primary" /> Study Planner
         </h1>
         <p className="text-base-content/70">
           Get AI-powered personalized study schedules

@@ -1,3 +1,5 @@
+import { PrimaryButton } from "./PrimaryButton";
+
 export default function ConfirmDeleteModal({
   open,
   title = "Delete",
@@ -16,16 +18,16 @@ export default function ConfirmDeleteModal({
         <p className="py-4">{message}</p>
 
         <div className="modal-action">
-          <button className="btn" onClick={onCancel}>
+          <PrimaryButton className="btn" onClick={onCancel}>
             Cancel
-          </button>
-          <button
-            className="btn btn-error"
+          </PrimaryButton>
+          <PrimaryButton
+            className="btn bg-secondary/80  hover:bg-secondary px-7"
             onClick={onConfirm}
             disabled={loading}
           >
             {loading ? "Deleting..." : confirmText}
-          </button>
+          </PrimaryButton>
         </div>
       </div>
       <div className="modal-backdrop" onClick={onCancel} />

@@ -1,5 +1,5 @@
-import { useAuth } from "../../context/AuthContext";
-import { useTheme } from "../../context/ThemeContext";
+import { useAuth } from "../context/AuthContext";
+import { useTheme } from "../context/ThemeContext";
 import { useNavigate } from "react-router-dom";
 import { MdBook, MdDarkMode, MdLightMode, MdMenu } from "react-icons/md";
 

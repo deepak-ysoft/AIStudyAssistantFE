@@ -50,7 +50,7 @@ export default function AIChatPage() {
     <div className="h-full flex flex-col">
       <div>
         <h1 className="text-3xl font-bold flex items-center gap-2">
-          <MdSmartToy className="text-blue-600" /> AI Chat Assistant
+          <MdSmartToy className="text-primary" /> AI Chat Assistant
         </h1>
         <p className="text-base-content/70">
           Ask questions and get instant help with your studies
