@@ -2,6 +2,9 @@ import { useState, useRef, useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { aiApi } from "../../api/aiApi";
 import { MdSmartToy } from "react-icons/md";
+import { PrimaryButton } from "../../components/PrimaryButton";
+import FormInput from "../../components/FormInput";
+import { FiSend } from "react-icons/fi";
 
 export default function AIChatPage() {
   const [messages, setMessages] = useState([
@@ -47,62 +50,72 @@ export default function AIChatPage() {
   };
 
   return (
-    <div className="h-full flex flex-col">
-      <div>
-        <h1 className="text-3xl font-bold flex items-center gap-2">
-          <MdSmartToy className="text-primary" /> AI Chat Assistant
-        </h1>
-        <p className="text-base-content/70">
-          Ask questions and get instant help with your studies
-        </p>
+    <div className="flex flex-col h-full space-y-4">
+      {/* Header */}
+      <div className="relative overflow-hidden rounded-3xl border border-base-300 bg-gradient-to-br from-primary/10 via-base-100 to-secondary/10 p-8">
+        <div className="relative z-10">
+          <h1 className="text-4xl font-bold mb-2 flex gap-3">
+            <MdSmartToy className="text-primary" /> AI Chat Assistant
+          </h1>
+          <p className="text-base-content/70">
+            Ask questions and get instant help with your studies
+          </p>
+        </div>
+        <div className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-primary/20 blur-3xl" />
       </div>
 
-      <div className="flex-1 bg-base-200 rounded-lg p-4 overflow-y-auto space-y-4  mt-6">
-        {messages.map((message) => (
-          <div
-            key={message.id}
-            className={`flex ${
-              message.sender === "user" ? "justify-end" : "justify-start"
-            }`}
-          >
+      <div className="rounded-3xl border border-base-300 bg-gradient-to-br from-primary/10 via-base-100 to-secondary/10 p-8 h-[calc(80vh-100px)]">
+        {/* Chat Area */}
+        <div className="flex-1 rounded-xl overflow-y-auto space-y-3  h-[calc(60vh-50px)]">
+          {messages.map((message) => (
             <div
-              className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                message.sender === "user"
-                  ? "bg-primary text-primary-content"
-                  : "bg-base-300"
+              key={message.id}
+              className={`flex ${
+                message.sender === "user" ? "justify-end" : "justify-start"
               }`}
             >
-              <p>{message.text}</p>
+              <div
+                className={`px-4 py-2 rounded-xl max-w-xs lg:max-w-md break-words ${
+                  message.sender === "user"
+                    ? "bg-primary text-primary-content rounded-br-none"
+                    : "bg-base-300 text-base-content rounded-bl-none"
+                }`}
+              >
+                <p>{message.text}</p>
+              </div>
             </div>
-          </div>
-        ))}
-        {chatMutation.isPending && (
-          <div className="flex justify-start">
-            <div className="flex gap-2 px-4 py-2 bg-base-300 rounded-lg">
-              <span className="loading loading-dots loading-sm"></span>
-            </div>
-          </div>
-        )}
-        <div ref={messagesEndRef} />
-      </div>
+          ))}
 
-      <form onSubmit={handleSendMessage} className="flex gap-2 mt-6">
-        <input
-          type="text"
-          placeholder="Ask anything..."
-          className="input input-bordered flex-1"
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          disabled={chatMutation.isPending}
-        />
-        <button
-          type="submit"
-          className="btn btn-primary"
-          disabled={chatMutation.isPending || !inputValue.trim()}
-        >
-          Send
-        </button>
-      </form>
+          {/* Loading */}
+          {chatMutation.isPending && (
+            <div className="flex justify-start">
+              <div className="flex gap-2 px-4 py-2 bg-base-300 rounded-xl rounded-bl-none">
+                <span className="loading loading-dots loading-sm"></span>
+              </div>
+            </div>
+          )}
+
+          <div ref={messagesEndRef} />
+        </div>
+
+        {/* Input */}
+        <form onSubmit={handleSendMessage} className="flex gap-2 mt-6">
+          <FormInput
+            containerClassName="flex-1"
+            placeholder="Ask anything..."
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            disabled={chatMutation.isPending}
+          />
+
+          <PrimaryButton
+            type="submit"
+            disabled={chatMutation.isPending || !inputValue.trim()}
+          >
+            <FiSend className="text-xl"/>
+          </PrimaryButton>
+        </form>
+      </div>
     </div>
   );
 }

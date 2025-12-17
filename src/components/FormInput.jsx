@@ -3,14 +3,17 @@ export default function FormInput({
   type = "text",
   value,
   onChange,
+  className,
+  containerClassName,
   placeholder,
   required,
+  disabled,
 }) {
   const base =
-    "w-full rounded-xl border border-base-300 bg-base-100 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40";
+    "w-full rounded-xl border border-base-300 bg-base-100 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40";
 
   return (
-    <div className="space-y-1.5">
+    <div className={`space-y-1.5 ${containerClassName || ""}`}>
       {label && (
         <label className="text-sm font-medium text-base-content/80">
           {label}
@@ -24,15 +27,17 @@ export default function FormInput({
           onChange={onChange}
           placeholder={placeholder}
           required={required}
+          disabled={disabled}
         />
       ) : (
         <input
           type={type}
-          className={base}
+          className={className ? className : base}
           value={value}
           onChange={onChange}
           placeholder={placeholder}
           required={required}
+          disabled={disabled}
         />
       )}
     </div>
