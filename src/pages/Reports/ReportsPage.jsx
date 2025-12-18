@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { reportApi } from "../../api/reportApi";
 import { MdAssessment } from "react-icons/md";
+import PageHeader from "../../components/PageHeader";
 
 export default function ReportsPage() {
   const [reportType, setReportType] = useState("weekly");
@@ -20,21 +21,15 @@ export default function ReportsPage() {
   });
 
   return (
-    <div className="flex flex-col h-full space-y-4">
+    <div>
       {/* Header */}
-      <div className="relative overflow-hidden rounded-3xl border border-base-300 bg-gradient-to-br from-primary/10 via-base-100 to-secondary/10 p-8">
-        <div className="relative z-10">
-          <h1 className="text-4xl font-bold mb-2 flex gap-3">
-            <MdAssessment className="text-primary" /> Performance Reports
-          </h1>
-          <p className="text-base-content/70">
-            Track your learning progress and improvements
-          </p>
-        </div>
-        <div className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-primary/20 blur-3xl" />
-      </div>
+      <PageHeader
+        icon={MdAssessment}
+        title="Performance Reports"
+        content="Track your learning progress and improvements"
+      />
       <div className="rounded-3xl border border-base-300 bg-gradient-to-br from-primary/10 via-base-100 to-secondary/10 p-8 ">
-        <div className="flex gap-2  mt-6">
+        <div className="flex gap-2  ">
           <button
             onClick={() => setReportType("weekly")}
             className={`btn tab ${
@@ -76,7 +71,7 @@ export default function ReportsPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4  mt-6">
-            <div className="card bg-base-200 shadow-md">
+            <div className="card bg-primary/35 shadow-md">
               <div className="card-body">
                 <h2 className="card-title text-sm">Study Hours</h2>
                 <p className="text-3xl font-bold text-primary">
@@ -84,7 +79,7 @@ export default function ReportsPage() {
                 </p>
               </div>
             </div>
-            <div className="card bg-base-200 shadow-md">
+            <div className="card bg-primary/35 shadow-md">
               <div className="card-body">
                 <h2 className="card-title text-sm">Topics Covered</h2>
                 <p className="text-3xl font-bold text-secondary">
@@ -92,7 +87,7 @@ export default function ReportsPage() {
                 </p>
               </div>
             </div>
-            <div className="card bg-base-200 shadow-md">
+            <div className="card bg-primary/35 shadow-md">
               <div className="card-body">
                 <h2 className="card-title text-sm">Quiz Average</h2>
                 <p className="text-3xl font-bold text-accent">
@@ -100,7 +95,7 @@ export default function ReportsPage() {
                 </p>
               </div>
             </div>
-            <div className="card bg-base-200 shadow-md">
+            <div className="card bg-primary/35 shadow-md">
               <div className="card-body">
                 <h2 className="card-title text-sm">Improvement</h2>
                 <p className="text-3xl font-bold text-success">
@@ -112,7 +107,7 @@ export default function ReportsPage() {
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6  mt-6">
-          <div className="card bg-base-200 shadow-md">
+          <div className="card bg-primary/35 shadow-md">
             <div className="card-body">
               <h2 className="card-title">Subject Performance</h2>
               <div className="space-y-3">
@@ -142,7 +137,7 @@ export default function ReportsPage() {
             </div>
           </div>
 
-          <div className="card bg-base-200 shadow-md ">
+          <div className="card bg-primary/35 shadow-md ">
             <div className="card-body">
               <h2 className="card-title">Recommendations</h2>
               <ul className="space-y-2 text-sm">
@@ -155,7 +150,7 @@ export default function ReportsPage() {
           </div>
         </div>
 
-        <div className="card bg-base-200 shadow-md  mt-6">
+        <div className="card bg-primary/35 shadow-md  mt-6">
           <div className="card-body">
             <h2 className="card-title mb-4">Weekly Insights</h2>
             <p className="text-base-content/70 mb-4">

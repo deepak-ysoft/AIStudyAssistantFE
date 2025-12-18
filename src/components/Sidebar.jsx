@@ -2,9 +2,6 @@ import { Link, useLocation } from "react-router-dom";
 import {
   MdDashboard,
   MdBook,
-  MdNotes,
-  MdCardGiftcard,
-  MdQuiz,
   MdSmartToy,
   MdCalendarToday,
   MdTimer,
@@ -29,15 +26,15 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="w-64 min-h-full bg-base-100 border-r border-base-300">
-      {/* LOGO */}
-      <div className="flex items-center gap-2 p-4 m-0.5 bg-base-200 shadow-md">
-        <MdBook className="text-2xl text-green-600 " />
+    <aside className="w-64 bg-base-100 border-r border-base-300 h-full">
+      {/* Logo */}
+      <div className="h-16 flex   items-center gap-3 px-5 border-b border-base-300">
+        <MdBook className="text-2xl text-primary" />
         <span className="text-lg font-semibold">AI Study Assistant</span>
       </div>
 
-      {/* NAV */}
-      <ul className="menu p-4 space-y-1">
+      {/* Nav */}
+      <ul className="menu px-4 py-4 space-y-2">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = location.pathname === item.path;
@@ -47,14 +44,18 @@ export default function Sidebar() {
               <Link
                 to={item.path}
                 onClick={closeDrawer}
-                className={`flex items-center gap-3 rounded-lg
-                  ${
-                    isActive
-                      ? "bg-primary text-primary-content"
-                      : "hover:bg-base-200"
-                  }`}
+                className={`flex items-center gap-3 rounded-lg px-3 py-2 transition text-lg
+          ${
+            isActive
+              ? "bg-primary text-primary-content shadow-sm shadow-primary/40"
+              : "hover:bg-primary/35 text-base-content"
+          }`}
               >
-                <Icon className="text-xl" />
+                <Icon
+                  className={` transition-colors text-2xl
+            ${isActive ? "text-primary-content" : "text-primary"}`}
+                />
+                
                 <span className="font-medium">{item.label}</span>
               </Link>
             </li>

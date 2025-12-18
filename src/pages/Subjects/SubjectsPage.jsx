@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import AppModal from "../../components/AppModal";
 import FormInput from "../../components/FormInput";
+import PageHeader from "../../components/PageHeader";
 
 export default function SubjectsPage() {
   const [showModal, setShowModal] = useState(false);
@@ -97,98 +98,89 @@ export default function SubjectsPage() {
   return (
     <div>
       {/* HEADER */}
-      <div className="relative mb-5 overflow-hidden rounded-3xl border border-base-300 bg-gradient-to-br from-primary/10 via-base-100 to-secondary/10 p-8">
-        <div className="relative z-10 flex justify-between items-center">
-          <div>
-            <h1 className="text-4xl font-bold tracking-tight flex items-center gap-2">
-              <MdBook className="text-primary" /> Subjects
-            </h1>
-            <p className="mt-2 text-base-content/70 max-w-md">
-              Organize your learning into focused subjects
-            </p>
-          </div>
-
-          <PrimaryButton
-            onClick={openCreateModal}
-            className="btn btn-primary px-6 shadow-lg hover:scale-[1.03] transition"
-          >
-            + New Subject
-          </PrimaryButton>
-        </div>
-
-        <div className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-primary/20 blur-3xl" />
-      </div>
-
+      <PageHeader
+        icon={MdBook}
+        title="Subjects"
+        content="Organize your learning into focused subjects"
+      >
+        <PrimaryButton
+          onClick={openCreateModal}
+          className="btn btn-primary px-6 shadow-lg hover:scale-[1.03] transition"
+        >
+          + New Subject
+        </PrimaryButton>
+      </PageHeader>
       {/* LIST */}
-      {isLoading ? (
-        <div className="flex justify-center py-20">
-          <span className="loading loading-spinner loading-lg" />
-        </div>
-      ) : subjects.length ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {subjects.map((subject) => (
-            <div
-              key={subject._id}
-              className="group relative overflow-hidden rounded-3xl bg-base-100 shadow-lg transition-all hover:shadow-xl cursor-pointer"
-              onClick={() => navigate(`/subjects/${subject._id}`)}
-            >
-              {/* Accent bar */}
-              <div className="pointer-events-none absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-primary to-secondary" />
+      <div className="rounded-3xl border border-base-300 bg-gradient-to-br from-primary/10 via-base-100 to-secondary/10 p-2 ">
+        {isLoading ? (
+          <div className="flex justify-center py-20">
+            <span className="loading loading-spinner loading-lg" />
+          </div>
+        ) : subjects.length ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 m-2 sm:m-5 gap-6 ">
+            {subjects.map((subject) => (
+              <div
+                key={subject._id}
+                className="group relative overflow-hidden rounded-3xl bg-base-100 shadow-lg transition-all hover:shadow-xl cursor-pointer"
+                onClick={() => navigate(`/subjects/${subject._id}`)}
+              >
+                {/* Accent bar */}
+                <div className="pointer-events-none absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-primary to-secondary" />
 
-              <div className="p-6 pl-8">
-                <h2 className="text-xl font-semibold flex justify-between items-start">
-                  {subject.name}
+                <div className="p-6 pl-8">
+                  <h2 className="text-xl font-semibold flex justify-between items-start">
+                    {subject.name}
 
-                  <div className="flex gap-2 transition">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        openEditModal(subject);
-                      }}
-                      className="btn btn-circle btn-sm bg-base-200 hover:bg-base-300"
-                    >
-                      <FiEdit2 className="text-primary" size={16} />
-                    </button>
+                    <div className="flex gap-2 transition">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openEditModal(subject);
+                        }}
+                        className="btn btn-circle btn-sm bg-primary/35 hover:bg-base-300"
+                      >
+                        <FiEdit2 className="text-primary" size={16} />
+                      </button>
 
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedSubject(subject);
-                        setShowDeleteModal(true);
-                      }}
-                      className="btn btn-circle btn-sm bg-base-200 hover:bg-base-300"
-                    >
-                      <FiTrash2 className="text-error" size={16} />
-                    </button>
-                  </div>
-                </h2>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedSubject(subject);
+                          setShowDeleteModal(true);
+                        }}
+                        className="btn btn-circle btn-sm bg-primary/35 hover:bg-base-300"
+                      >
+                        <FiTrash2 className="text-error" size={16} />
+                      </button>
+                    </div>
+                  </h2>
 
-                <p className="mt-3 text-sm text-base-content/70 line-clamp-3">
-                  {subject.description || "No description provided"}
-                </p>
+                  <p className="mt-3 text-sm text-base-content/70 line-clamp-3">
+                    {subject.description || "No description provided"}
+                  </p>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="relative flex flex-col items-center justify-center py-32 text-center">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/5 blur-2xl" />
+            ))}
+          </div>
+        ) : (
+          <div className="relative flex flex-col items-center justify-center py-32 text-center">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/5 blur-2xl" />
 
-          <MdBook className="text-6xl text-primary/60 mb-4 z-10" />
-          <h3 className="text-2xl font-semibold z-10">No subjects yet</h3>
-          <p className="text-base-content/70 mt-2 max-w-md z-10">
-            Create subjects to organize notes, quizzes, and flashcards
-          </p>
+            <MdBook className="text-6xl text-primary/60 mb-4 z-10" />
+            <h3 className="text-2xl font-semibold z-10">No subjects yet</h3>
+            <p className="text-base-content/70 mt-2 max-w-md z-10">
+              Create subjects to organize notes, quizzes, and flashcards
+            </p>
 
-          <button
-            onClick={openCreateModal}
-            className="btn btn-primary rounded-full mt-6 z-10"
-          >
-            Create your first subject
-          </button>
-        </div>
-      )}
-
+            <button
+              onClick={openCreateModal}
+              className="btn btn-primary rounded-full mt-6 z-10"
+            >
+              Create your first subject
+            </button>
+          </div>
+        )}
+      </div>
       {/* CREATE / UPDATE MODAL */}
       <AppModal
         open={showModal}

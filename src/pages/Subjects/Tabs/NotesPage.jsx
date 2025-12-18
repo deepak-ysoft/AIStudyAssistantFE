@@ -9,6 +9,7 @@ import { PrimaryButton } from "../../../components/PrimaryButton";
 import { FiEdit2, FiTrash2, FiEye } from "react-icons/fi";
 import { HiOutlineSparkles } from "react-icons/hi2";
 import { TbCards, TbPaperclip } from "react-icons/tb";
+import PageHeader from "../../../components/PageHeader";
 
 export default function SubjectNotesPage({ subjectId }) {
   const [showModal, setShowModal] = useState(false);
@@ -132,129 +133,116 @@ export default function SubjectNotesPage({ subjectId }) {
   return (
     <div>
       {/* HEADER */}
-      <div className="relative mb-5 overflow-hidden rounded-3xl border border-base-300 bg-gradient-to-br from-primary/10 via-base-100 to-secondary/10 p-8">
-        <div className="relative z-10 flex justify-between items-center">
-          <div>
-            <h1 className="text-4xl font-bold tracking-tight flex items-center gap-2">
-              <MdNotes className="text-primary" /> Notes
-            </h1>
-            <p className="mt-2 text-base-content/70 max-w-lg">
-              Capture ideas, summarize knowledge, and generate flashcards
-              instantly
-            </p>
-          </div>
-
-          <PrimaryButton
-            onClick={openCreateModal}
-            className="btn btn-primary px-6 shadow-lg hover:scale-[1.03] transition"
-          >
-            + New Note
-          </PrimaryButton>
-        </div>
-
-        {/* Decorative glow */}
-        <div className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-primary/20 blur-3xl" />
-      </div>
-
+      <PageHeader
+        icon={MdNotes}
+        title="Notes"
+        content="Capture ideas, summarize knowledge, and generate flashcards
+              instantly"
+      >
+        <PrimaryButton
+          onClick={openCreateModal}
+          className="btn btn-primary px-6 shadow-lg hover:scale-[1.03] transition"
+        >
+          + New Note
+        </PrimaryButton>
+      </PageHeader>
       {/* LIST */}
-      {isLoading ? (
-        <div className="flex justify-center py-20">
-          <span className="loading loading-spinner loading-lg" />
-        </div>
-      ) : notes.length ? (
-        <div className="space-y-3 max-h-[calc(100vh-380px)] overflow-y-auto p-2">
-          {notes.map((note) => (
-            <div
-              key={note._id}
-              className="group relative overflow-hidden rounded-3xl bg-base-100 shadow-lg transition-all hover:shadow-xl"
-            >
-              {/* Accent bar */}
-              <div className="pointer-events-none absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-primary to-secondary" />
+      <div className="rounded-3xl border border-base-300 bg-gradient-to-br from-primary/10 via-base-100 to-secondary/10 p-2 ">
+        {isLoading ? (
+          <div className="flex justify-center py-20">
+            <span className="loading loading-spinner loading-lg" />
+          </div>
+        ) : notes.length ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[calc(70vh-105px)] p-6 overflow-y-auto">
+            {notes.map((note) => (
+              <div
+                key={note._id}
+                className="group relative overflow-hidden rounded-3xl bg-base-100 shadow-lg transition-all hover:shadow-xl"
+              >
+                {/* Accent bar */}
+                <div className="pointer-events-none absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-primary to-secondary" />
 
-              <div className="p-6 pl-8">
-                <div className="flex justify-between gap-4">
-                  <div>
-                    <h2 className="text-xl font-semibold flex justify-between">
-                      {note.title}
+                <div className="p-6 pl-8">
+                  <h2 className="text-xl font-semibold flex flex-col xl:flex-row justify-between items-start xl:items-center gap-3">
+                    {/* Title */}
+                    <span className="order-2 xl:order-1">{note.title}</span>
 
-                      {/* actions */}
-                      <div className="flex gap-3 transition">
-                        <button
-                          className="btn btn-circle btn-sm bg-base-200 hover:bg-base-300"
-                          onClick={() => openEditModal(note)}
-                        >
-                          <FiEdit2 className="text-primary" size={16} />
-                        </button>
+                    {/* Actions */}
+                    <div className="order-1 xl:order-2 flex gap-3 transition">
+                      <button
+                        className="btn btn-circle btn-sm bg-primary/35 hover:bg-base-300"
+                        onClick={() => openEditModal(note)}
+                      >
+                        <FiEdit2 className="text-primary" size={16} />
+                      </button>
 
-                        <button
-                          className="btn btn-circle btn-sm bg-base-200 hover:bg-base-300"
-                          onClick={() => openDetailsModal(note)}
-                        >
-                          <FiEye className="text-info" size={16} />
-                        </button>
+                      <button
+                        className="btn btn-circle btn-sm bg-primary/35 hover:bg-base-300"
+                        onClick={() => openDetailsModal(note)}
+                      >
+                        <FiEye className="text-info" size={16} />
+                      </button>
 
-                        <button
-                          className="btn btn-circle btn-sm bg-base-200 hover:bg-base-300"
-                          onClick={() => {
-                            setSelectedNote(note);
-                            setShowDeleteModal(true);
-                          }}
-                        >
-                          <FiTrash2 className="text-error" size={16} />
-                        </button>
-                      </div>
-                    </h2>
+                      <button
+                        className="btn btn-circle btn-sm bg-primary/35 hover:bg-base-300"
+                        onClick={() => {
+                          setSelectedNote(note);
+                          setShowDeleteModal(true);
+                        }}
+                      >
+                        <FiTrash2 className="text-error" size={16} />
+                      </button>
+                    </div>
+                  </h2>
 
-                    <p className="text-sm pt-5 text-base-content/70 line-clamp-4">
-                      {note.content}
-                    </p>
+                  <p className="text-sm pt-5 text-base-content/70 line-clamp-4">
+                    {note.content}
+                  </p>
+
+                  {/* Action bar */}
+                  <div className="mt-6 flex gap-2">
+                    <button
+                      className="btn btn-sm rounded-full bg-primary/10 text-primary hover:bg-primary/20"
+                      onClick={() => summarizeMutation.mutate(note._id)}
+                    >
+                      <HiOutlineSparkles size={16} />
+                      <span className="hidden lg:inline"> Summarize</span>
+                    </button>
+
+                    <button
+                      className="btn btn-sm rounded-full bg-secondary/10 text-secondary hover:bg-secondary/20"
+                      onClick={() => flashcardMutation.mutate(note._id)}
+                    >
+                      <TbCards size={16} />
+                      <span className="hidden lg:inline"> Flashcards</span>
+                    </button>
                   </div>
                 </div>
-
-                {/* Action bar */}
-                <div className="mt-6 flex gap-3">
-                  <button
-                    className="btn btn-sm rounded-full bg-primary/10 text-primary hover:bg-primary/20"
-                    onClick={() => summarizeMutation.mutate(note._id)}
-                  >
-                    <HiOutlineSparkles className="mr-1" size={16} />
-                    Summarize
-                  </button>
-
-                  <button
-                    className="btn btn-sm rounded-full bg-secondary/10 text-secondary hover:bg-secondary/20"
-                    onClick={() => flashcardMutation.mutate(note._id)}
-                  >
-                    <TbCards className="mr-1" size={16} />
-                    Flashcards
-                  </button>
-                </div>
               </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="relative flex flex-col items-center justify-center py-32 text-center">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/5 blur-2xl" />
+            ))}
+          </div>
+        ) : (
+          <div className="relative flex flex-col items-center justify-center py-32 text-center h-[calc(60vh-60px)]">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/5 blur-2xl" />
 
-          <MdNotes className="text-6xl text-primary/60 mb-4 z-10" />
-          <h3 className="text-2xl font-semibold z-10">
-            Start building your knowledge
-          </h3>
-          <p className="text-base-content/70 mt-2 max-w-md z-10">
-            Create notes, generate summaries, and turn them into flashcards
-            automatically
-          </p>
+            <MdNotes className="text-6xl text-primary/60 mb-4 z-10" />
+            <h3 className="text-2xl font-semibold z-10">
+              Start building your knowledge
+            </h3>
+            <p className="text-base-content/70 mt-2 max-w-md z-10">
+              Create notes, generate summaries, and turn them into flashcards
+              automatically
+            </p>
 
-          <button
-            onClick={openCreateModal}
-            className="btn btn-primary rounded-full mt-6 z-10"
-          >
-            Create your first note
-          </button>
-        </div>
-      )}
-
+            <button
+              onClick={openCreateModal}
+              className="btn btn-primary rounded-full mt-6 z-10"
+            >
+              Create your first note
+            </button>
+          </div>
+        )}
+      </div>
       {/* CREATE / EDIT MODAL */}
       <AppModal
         open={showModal}
@@ -299,7 +287,6 @@ export default function SubjectNotesPage({ subjectId }) {
           </div>
         </form>
       </AppModal>
-
       {/* Details Modal */}
       <AppModal
         open={showDetailsModal}
@@ -311,7 +298,7 @@ export default function SubjectNotesPage({ subjectId }) {
             <h2 className="text-2xl font-semibold">{detailsNote?.title}</h2>
           </div>
 
-          <div className="rounded-2xl bg-base-200 p-5 max-h-[60vh] overflow-y-auto">
+          <div className="rounded-2xl bg-primary/35 p-5 max-h-[60vh] overflow-y-auto">
             <p className="whitespace-pre-wrap text-sm leading-relaxed">
               {detailsNote?.content}
             </p>
@@ -324,7 +311,6 @@ export default function SubjectNotesPage({ subjectId }) {
           </div>
         </div>
       </AppModal>
-
       {/* DELETE CONFIRM MODAL */}
       <ConfirmDeleteModal
         open={showDeleteModal}

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { MdTimer } from "react-icons/md";
+import PageHeader from "../../components/PageHeader";
 
 export default function PomodoroPage() {
   const WORK_TIME = 25 * 60;
@@ -39,19 +40,13 @@ export default function PomodoroPage() {
   };
 
   return (
-    <div className="flex flex-col h-full space-y-4">
+    <div>
       {/* Header */}
-      <div className="relative overflow-hidden rounded-3xl border border-base-300 bg-gradient-to-br from-primary/10 via-base-100 to-secondary/10 p-8">
-        <div className="relative z-10">
-          <h1 className="text-4xl font-bold mb-2 flex gap-3">
-            <MdTimer className="text-primary" /> Pomodoro Timer
-          </h1>
-          <p className="text-base-content/70">
-            Stay focused with the Pomodoro Technique
-          </p>
-        </div>
-        <div className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-primary/20 blur-3xl" />
-      </div>
+      <PageHeader
+        icon={MdTimer}
+        title="Pomodoro Timer"
+        content="Stay focused with the Pomodoro Technique"
+      />
       <div className="rounded-3xl border border-base-300 bg-gradient-to-br from-primary/10 via-base-100 to-secondary/10 p-8 h-[calc(80vh-100px)]">
         <div className="space-y-6">
           {/* TIMER */}

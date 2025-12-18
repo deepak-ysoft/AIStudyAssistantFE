@@ -5,6 +5,7 @@ import { MdCalendarToday } from "react-icons/md";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import FormInput from "../../components/FormInput";
 import { FiCalendar } from "react-icons/fi";
+import PageHeader from "../../components/PageHeader";
 
 export default function StudyPlannerPage() {
   const [formData, setFormData] = useState({
@@ -27,24 +28,18 @@ export default function StudyPlannerPage() {
   };
 
   return (
-    <div className="flex flex-col h-full space-y-4">
+    <div >
       {/* heaer */}
-      <div className="relative overflow-hidden rounded-3xl border border-base-300 bg-gradient-to-br from-primary/10 via-base-100 to-secondary/10 p-8">
-        <div className="relative z-10">
-          <h1 className="text-4xl font-bold mb-2 flex gap-3">
-            <MdCalendarToday className="text-primary" /> Study Planner
-          </h1>
-          <p className="text-base-content/70">
-            Get AI-powered personalized study schedules
-          </p>
-        </div>
-        <div className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-primary/20 blur-3xl" />
-      </div>
+      <PageHeader
+        icon={MdCalendarToday}
+        title="Study Planner"
+        content=" Get AI-powered personalized study schedules"
+      />
       <div className="rounded-3xl border border-base-300 bg-gradient-to-br from-primary/10 via-base-100 to-secondary/10 p-8 h-[calc(80vh-100px)]">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* LEFT – FORM */}
           <div className="lg:col-span-1">
-            <div className="card bg-base-200 shadow-lg rounded-3xl overflow-hidden">
+            <div className="card bg-primary/35 shadow-lg rounded-3xl overflow-hidden">
               {/* Card Header */}
               <div className="bg-gradient-to-r from-primary/10 to-secondary/10 px-6 py-4 border-b border-base-300">
                 <h2 className="text-lg font-semibold">Create Study Plan</h2>
@@ -116,7 +111,7 @@ export default function StudyPlannerPage() {
           {/* RIGHT – RESULT */}
           <div className="lg:col-span-2">
             {plan ? (
-              <div className="card bg-base-200 shadow-lg rounded-3xl overflow-hidden">
+              <div className="card bg-primary/35 shadow-lg rounded-3xl overflow-hidden">
                 {/* Header */}
                 <div className="bg-gradient-to-r from-primary/10 to-secondary/10 px-6 py-4 border-b border-base-300">
                   <h2 className="text-lg font-semibold">
@@ -142,7 +137,7 @@ export default function StudyPlannerPage() {
                 </div>
               </div>
             ) : (
-              <div className="card bg-base-200 shadow-lg rounded-3xl">
+              <div className="card bg-primary/35 shadow-lg rounded-3xl">
                 <div className="card-body flex flex-col items-center justify-center py-20 text-center">
                   <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
                     <span className="text-primary text-2xl">

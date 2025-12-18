@@ -4,7 +4,7 @@ import Sidebar from "../components/Sidebar";
 
 export default function MainLayout() {
   return (
-    <div className="drawer md:drawer-open h-screen bg-base-100">
+    <div className="drawer md:drawer-open min-h-screen bg-base-100 overflow-hidden">
       {/* REQUIRED TOGGLE */}
       <input id="main-drawer" type="checkbox" className="drawer-toggle" />
 
@@ -12,7 +12,7 @@ export default function MainLayout() {
       <div className="drawer-content flex flex-col overflow-hidden">
         <Navbar />
 
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 max-h-[calc(100vh-70px)] overflow-y-auto overflow-x-hidden">
           <div className="px-4 md:px-6 lg:px-8 py-6">
             <Outlet />
           </div>

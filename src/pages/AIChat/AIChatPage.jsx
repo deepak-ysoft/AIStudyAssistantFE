@@ -5,6 +5,7 @@ import { MdSmartToy } from "react-icons/md";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import FormInput from "../../components/FormInput";
 import { FiSend } from "react-icons/fi";
+import PageHeader from "../../components/PageHeader";
 
 export default function AIChatPage() {
   const [messages, setMessages] = useState([
@@ -50,23 +51,16 @@ export default function AIChatPage() {
   };
 
   return (
-    <div className="flex flex-col h-full space-y-4">
-      {/* Header */}
-      <div className="relative overflow-hidden rounded-3xl border border-base-300 bg-gradient-to-br from-primary/10 via-base-100 to-secondary/10 p-8">
-        <div className="relative z-10">
-          <h1 className="text-4xl font-bold mb-2 flex gap-3">
-            <MdSmartToy className="text-primary" /> AI Chat Assistant
-          </h1>
-          <p className="text-base-content/70">
-            Ask questions and get instant help with your studies
-          </p>
-        </div>
-        <div className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-primary/20 blur-3xl" />
-      </div>
-
-      <div className="rounded-3xl border border-base-300 bg-gradient-to-br from-primary/10 via-base-100 to-secondary/10 p-8 h-[calc(80vh-100px)]">
+    <div >
+      {/* HEADER */}
+      <PageHeader
+        icon={MdSmartToy}
+        title="AI Chat Assistant"
+        content="Ask questions and get instant help with your studies"
+      />
+      <div className="rounded-3xl border border-base-300 bg-gradient-to-br from-primary/10 via-base-100 to-secondary/10 p-3 sm:p-8 h-[calc(80vh-100px)]">
         {/* Chat Area */}
-        <div className="flex-1 rounded-xl overflow-y-auto space-y-3  h-[calc(60vh-50px)]">
+        <div className="flex-1 rounded-xl overflow-y-auto space-y-3 h-[calc(60vh-50px)]">
           {messages.map((message) => (
             <div
               key={message.id}
@@ -112,7 +106,7 @@ export default function AIChatPage() {
             type="submit"
             disabled={chatMutation.isPending || !inputValue.trim()}
           >
-            <FiSend className="text-xl"/>
+            <FiSend className="text-xl" />
           </PrimaryButton>
         </form>
       </div>
