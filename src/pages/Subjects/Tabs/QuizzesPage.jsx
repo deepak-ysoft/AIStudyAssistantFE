@@ -165,7 +165,13 @@ export default function SubjectQuizzesPage({ subjectId }) {
             <span className="loading loading-spinner loading-lg" />
           </div>
         ) : quizzes.length ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[calc(70vh-105px)] p-6 overflow-y-auto">
+          <div
+            className={`${
+              quizzes.length === 1
+                ? "grid grid-cols-1"
+                : "grid grid-cols-1 md:grid-cols-2"
+            } gap-4 p-1 sm:p-6`}
+          >
             {quizzes.map((quiz) => (
               <div
                 key={quiz._id}
@@ -173,9 +179,9 @@ export default function SubjectQuizzesPage({ subjectId }) {
               >
                 <div className="pointer-events-none absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-primary to-secondary" />
                 <div className="p-6 pl-8">
-                  <h2 className="text-xl font-semibold flex flex-col xl:flex-row justify-between items-start xl:items-center ">
+                  <h2 className="text-xl font-semibold flex flex-col xl:flex-row justify-between items-start xl:items-center gap-3">
                     <div className="order-2 xl:order-1"> {quiz.title}</div>
-                    <div className="order-1 xl:order-2 flex  gap-3">
+                    <div className="order-1 xl:order-2  flex  gap-3">
                       <button
                         className="btn btn-circle btn-sm bg-primary/35 hover:bg-base-300"
                         onClick={() => startQuizMutation.mutate(quiz._id)}

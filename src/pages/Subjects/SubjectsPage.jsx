@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { subjectsApi } from "../../api/subjectsApi";
 import { MdBook } from "react-icons/md";
-import { FiEdit2, FiTrash2 } from "react-icons/fi";
+import { FiEdit2, FiEye, FiTrash2 } from "react-icons/fi";
 import ConfirmDeleteModal from "../../components/ConfirmDeleteModal";
 import { useNavigate } from "react-router-dom";
 import { PrimaryButton } from "../../components/PrimaryButton";
@@ -12,6 +12,8 @@ import PageHeader from "../../components/PageHeader";
 
 export default function SubjectsPage() {
   const [showModal, setShowModal] = useState(false);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [detailsSubject, setDetailsSubject] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedSubject, setSelectedSubject] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -93,6 +95,16 @@ export default function SubjectsPage() {
     }
   };
 
+  const openDetailsModal = (note) => {
+    setDetailsSubject(note);
+    setShowDetailsModal(true);
+  };
+
+  const closeDetailsModal = () => {
+    setShowDetailsModal(false);
+    setDetailsSubject(null);
+  };
+
   /* ---------------- UI ---------------- */
 
   return (
@@ -117,7 +129,17 @@ export default function SubjectsPage() {
             <span className="loading loading-spinner loading-lg" />
           </div>
         ) : subjects.length ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 m-2 sm:m-5 gap-6 ">
+          <div
+            className={`${
+              subjects.length >= 3
+                ? "grid grid-cols-1 md:grid-cols-2  lg:grid-cols-3"
+                : subjects.length === 2
+                ? "grid grid-cols-1 md:grid-cols-2"
+                : subjects.length === 1
+                ? "grid grid-cols-1"
+                : ""
+            } m-2 sm:m-5 gap-6`}
+          >
             {subjects.map((subject) => (
               <div
                 key={subject._id}
@@ -128,10 +150,9 @@ export default function SubjectsPage() {
                 <div className="pointer-events-none absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-primary to-secondary" />
 
                 <div className="p-6 pl-8">
-                  <h2 className="text-xl font-semibold flex justify-between items-start">
-                    {subject.name}
-
-                    <div className="flex gap-2 transition">
+                  <h2 className="text-xl font-semibold flex flex-col xl:flex-row justify-between items-start xl:items-center gap-3">
+                    <div className="order-2 xl:order-1 ">{subject.name}</div>
+                    <div className="order-1 xl:order-2 flex gap-2 transition">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -140,6 +161,16 @@ export default function SubjectsPage() {
                         className="btn btn-circle btn-sm bg-primary/35 hover:bg-base-300"
                       >
                         <FiEdit2 className="text-primary" size={16} />
+                      </button>
+
+                      <button
+                        className="btn btn-circle btn-sm bg-primary/35 hover:bg-base-300"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openDetailsModal(subject);
+                        }}
+                      >
+                        <FiEye className="text-info" size={16} />
                       </button>
 
                       <button
@@ -224,6 +255,30 @@ export default function SubjectsPage() {
         </form>
       </AppModal>
 
+      {/* Details Modal */}
+      <AppModal
+        open={showDetailsModal}
+        title="Subject Details"
+        onClose={closeDetailsModal}
+      >
+        <div className="space-y-4">
+          <div>
+            <h2 className="text-2xl font-semibold">{detailsSubject?.name}</h2>
+          </div>
+
+          <div className="rounded-2xl bg-primary/35 p-5 max-h-[60vh] overflow-y-auto">
+            <p className="whitespace-pre-wrap text-sm leading-relaxed">
+              {detailsSubject?.description}
+            </p>
+          </div>
+
+          <div className="flex justify-end pt-2">
+            <button className="btn btn-ghost" onClick={closeDetailsModal}>
+              Close
+            </button>
+          </div>
+        </div>
+      </AppModal>
       {/* DELETE CONFIRM */}
       <ConfirmDeleteModal
         open={showDeleteModal}

@@ -47,95 +47,91 @@ export default function PomodoroPage() {
         title="Pomodoro Timer"
         content="Stay focused with the Pomodoro Technique"
       />
-      <div className="rounded-3xl border border-base-300 bg-gradient-to-br from-primary/10 via-base-100 to-secondary/10 p-8 h-[calc(80vh-100px)]">
-        <div className="space-y-6">
-          {/* TIMER */}
-          <div className="lg:col-span-1 flex justify-center items-start">
-            <div className="relative w-full max-w-xs py-16 rounded-3xl overflow-hidden shadow-xl bg-gradient-to-br from-primary to-secondary p-8">
-              {/* Glow */}
-              <div className="absolute inset-0 bg-black/10" />
+      <div className="rounded-3xl border border-base-300 bg-gradient-to-br from-primary/10 via-base-100 to-secondary/10 p-3 sm:p-8 gap-6">
+        {/* TIMER */}
+        <div className="lg:col-span-1 flex justify-center items-start">
+          <div className="relative w-full max-w-xs py-16 rounded-3xl overflow-hidden shadow-xl bg-gradient-to-br from-primary to-secondary p-8">
+            {/* Glow */}
+            <div className="absolute inset-0 bg-black/10" />
 
-              <div className="relative text-center space-y-6">
-                <h2 className="text-primary-content text-2xl font-bold tracking-wide">
-                  {isWorkTime ? "Focus Time" : "Break Time"}
-                </h2>
+            <div className="relative text-center space-y-6">
+              <h2 className="text-primary-content text-2xl font-bold tracking-wide">
+                {isWorkTime ? "Focus Time" : "Break Time"}
+              </h2>
 
-                <div className="text-6xl font-mono font-extrabold text-primary-content">
-                  {String(minutes).padStart(2, "0")}:
-                  {String(secs).padStart(2, "0")}
-                </div>
+              <div className="text-6xl font-mono font-extrabold text-primary-content">
+                {String(minutes).padStart(2, "0")}:
+                {String(secs).padStart(2, "0")}
+              </div>
 
-                {/* Controls */}
-                <div className="flex justify-center gap-3">
-                  <button
-                    onClick={toggleTimer}
-                    className="btn btn-outline btn-primary-content rounded-full px-6"
-                  >
-                    {isActive ? "Pause" : "Start"}
-                  </button>
+              {/* Controls */}
+              <div className="flex justify-center gap-3">
+                <button
+                  onClick={toggleTimer}
+                  className="btn btn-outline btn-primary-content rounded-full px-6"
+                >
+                  {isActive ? "Pause" : "Start"}
+                </button>
 
-                  <button
-                    onClick={resetTimer}
-                    className="btn btn-outline btn-primary-content rounded-full px-6"
-                  >
-                    Reset
-                  </button>
-                </div>
+                <button
+                  onClick={resetTimer}
+                  className="btn btn-outline btn-primary-content rounded-full px-6"
+                >
+                  Reset
+                </button>
+              </div>
 
-                <p className="text-primary-content/90 text-sm">
-                  Sessions completed:{" "}
+              <p className="text-primary-content/90 text-sm">
+                Sessions completed:{" "}
+                <span className="font-semibold">{sessions}</span>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* RIGHT SIDE */}
+        <div className="lg:col-span-2 grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          {/* STATS */}
+          <div className="card bg-primary/35 shadow-lg rounded-3xl">
+            <div className="card-body">
+              <h2 className="card-title">Today's Stats</h2>
+
+              <div className="gap-2 text-sm">
+                <p className="flex justify-between">
+                  <span className="text-base-content/70">Total Focus Time</span>
+                  <span className="font-semibold">2h 30m</span>
+                </p>
+                <p className="flex justify-between">
+                  <span className="text-base-content/70">Sessions</span>
                   <span className="font-semibold">{sessions}</span>
+                </p>
+                <p className="flex justify-between">
+                  <span className="text-base-content/70">Current Streak</span>
+                  <span className="font-semibold">7 days</span>
                 </p>
               </div>
             </div>
           </div>
 
-          {/* RIGHT SIDE */}
-          <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* STATS */}
-            <div className="card bg-primary/35 shadow-lg rounded-3xl">
-              <div className="card-body">
-                <h2 className="card-title">Today's Stats</h2>
+          {/* TIPS */}
+          <div className="card bg-primary/35 shadow-lg rounded-3xl">
+            <div className="card-body">
+              <h2 className="card-title">Focus Tips</h2>
 
-                <div className="space-y-2 text-sm">
-                  <p className="flex justify-between">
-                    <span className="text-base-content/70">
-                      Total Focus Time
-                    </span>
-                    <span className="font-semibold">2h 30m</span>
-                  </p>
-                  <p className="flex justify-between">
-                    <span className="text-base-content/70">Sessions</span>
-                    <span className="font-semibold">{sessions}</span>
-                  </p>
-                  <p className="flex justify-between">
-                    <span className="text-base-content/70">Current Streak</span>
-                    <span className="font-semibold">7 days</span>
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* TIPS */}
-            <div className="card bg-primary/35 shadow-lg rounded-3xl">
-              <div className="card-body">
-                <h2 className="card-title">Focus Tips</h2>
-
-                <ul className="space-y-2 text-sm">
-                  <li className="flex gap-2">
-                    <span className="text-success">✓</span>
-                    Eliminate distractions during focus time
-                  </li>
-                  <li className="flex gap-2">
-                    <span className="text-success">✓</span>
-                    Use break time to stretch and hydrate
-                  </li>
-                  <li className="flex gap-2">
-                    <span className="text-success">✓</span>
-                    After 4 sessions, take a longer break
-                  </li>
-                </ul>
-              </div>
+              <ul className="space-y-2 text-sm">
+                <li className="flex gap-2">
+                  <span className="text-success">✓</span>
+                  Eliminate distractions during focus time
+                </li>
+                <li className="flex gap-2">
+                  <span className="text-success">✓</span>
+                  Use break time to stretch and hydrate
+                </li>
+                <li className="flex gap-2">
+                  <span className="text-success">✓</span>
+                  After 4 sessions, take a longer break
+                </li>
+              </ul>
             </div>
           </div>
         </div>

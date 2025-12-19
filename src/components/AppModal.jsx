@@ -10,7 +10,7 @@ export default function AppModal({ open, title, onClose, children }) {
       />
 
       {/* Modal */}
-      <div className="relative w-full max-w-2xl rounded-3xl bg-base-100 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.4)] animate-scaleIn">
+      <div className="relative w-full max-w-2xl rounded-3xl bg-base-100 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.4)] animate-scaleIn  m-2">
         <div className="border-b border-base-300 px-6 py-4">
           <h3 className="text-xl font-semibold">{title}</h3>
         </div>

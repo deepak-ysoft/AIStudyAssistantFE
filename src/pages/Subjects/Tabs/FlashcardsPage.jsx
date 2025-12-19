@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { MdCardGiftcard } from "react-icons/md";
-import { FiEdit2 } from "react-icons/fi";
+import { FiEdit2, FiTrash2 } from "react-icons/fi";
 import { flashcardApi } from "../../../api/flashcardApi";
 import { PrimaryButton } from "../../../components/PrimaryButton";
 import AppModal from "../../../components/AppModal";
 import FormInput from "../../../components/FormInput";
 import PageHeader from "../../../components/PageHeader";
+import ConfirmDeleteModal from "../../../components/ConfirmDeleteModal";
 
 export default function SubjectFlashcardsPage({ subjectId }) {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -15,6 +16,7 @@ export default function SubjectFlashcardsPage({ subjectId }) {
   const [showModal, setShowModal] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedCard, setSelectedCard] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const [formData, setFormData] = useState({
     question: "",
@@ -62,6 +64,15 @@ export default function SubjectFlashcardsPage({ subjectId }) {
       handleNext();
     },
   });
+
+    const deleteMutation = useMutation({
+      mutationFn: flashcardApi.delete,
+      onSuccess: () => {
+        setShowDeleteModal(false);
+        setSelectedCard(null);
+        refetch();
+      },
+    });
 
   /* ---------------- HELPERS ---------------- */
 
@@ -171,6 +182,16 @@ export default function SubjectFlashcardsPage({ subjectId }) {
               >
                 <FiEdit2 className="text-primary" />
               </button>
+              <button
+                className="absolute bottom-4 right-4 btn btn-circle btn-sm bg-base-100/90 hover:bg-base-100"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedCard(currentCard);
+                  setShowDeleteModal(true);
+                }}
+              >
+                <FiTrash2 className="text-error" size={16} />
+              </button>
             </div>
 
             {/* REVIEW ACTIONS */}
@@ -275,6 +296,15 @@ export default function SubjectFlashcardsPage({ subjectId }) {
           </div>
         </form>
       </AppModal>
+
+      <ConfirmDeleteModal
+        open={showDeleteModal}
+        title="Delete Card"
+        message={`Are you sure you want to delete?`}
+        loading={deleteMutation.isPending}
+        onCancel={() => setShowDeleteModal(false)}
+        onConfirm={() => deleteMutation.mutate(selectedCard._id)}
+      />
     </div>
   );
 }

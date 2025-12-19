@@ -16,6 +16,7 @@ import PomodoroPage from "../pages/Pomodoro/PomodoroPage";
 import ReportsPage from "../pages/Reports/ReportsPage";
 import SubjectDetailsPage from "../pages/Subjects/SubjectDetailsPage";
 import SubjectNotesPage from "../pages/Subjects/Tabs/NotesPage";
+import ProfilePage from "../pages/Profile/ProfilePage";
 
 function ErrorFallback() {
   return (
@@ -129,6 +130,10 @@ export const router = createBrowserRouter([
       {
         path: "reports",
         element: <ReportsPage />,
+      },
+      {
+        path: "profile",
+        element: <ProfilePage />,
       },
     ],
   },

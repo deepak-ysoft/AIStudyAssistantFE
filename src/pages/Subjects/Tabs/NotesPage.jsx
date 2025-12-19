@@ -153,7 +153,13 @@ export default function SubjectNotesPage({ subjectId }) {
             <span className="loading loading-spinner loading-lg" />
           </div>
         ) : notes.length ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[calc(70vh-105px)] p-6 overflow-y-auto">
+          <div
+            className={`${
+              notes.length === 1
+                ? "grid grid-cols-1"
+                : "grid grid-cols-1 md:grid-cols-2 "
+            }gap-4 p-1 sm:p-6`}
+          >
             {notes.map((note) => (
               <div
                 key={note._id}

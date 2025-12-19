@@ -40,10 +40,12 @@ export default function Navbar() {
 
           {user && (
             <div className="dropdown dropdown-end">
-              <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
-                <div className="w-9 rounded-full bg-primary text-primary-content flex items-center justify-center font-semibold">
-                  {user.name?.charAt(0) || "U"}
-                </div>
+              <label tabIndex={0} className="btn btn-ghost btn-circle">
+                <img
+                  src={user?.avatar}
+                  className="p-0.5 rounded-full bg-primary"
+                  alt="Avatar"
+                />
               </label>
 
               <ul className="dropdown-content menu mt-3 p-2 shadow-lg bg-base-100 rounded-box w-56">
@@ -52,10 +54,22 @@ export default function Navbar() {
                 </li>
                 <div className="divider my-1" />
                 <li>
-                  <a>Settings</a>
+                  <button
+                    type="button"
+                    onClick={() => navigate("/profile")}
+                    className="w-full text-left"
+                  >
+                    Profile
+                  </button>
                 </li>
                 <li>
-                  <a onClick={handleLogout}>Logout</a>
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="w-full text-left"
+                  >
+                    Logout
+                  </button>
                 </li>
               </ul>
             </div>

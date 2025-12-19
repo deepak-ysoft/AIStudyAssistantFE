@@ -35,7 +35,7 @@ export default function StudyPlannerPage() {
         title="Study Planner"
         content=" Get AI-powered personalized study schedules"
       />
-      <div className="rounded-3xl border border-base-300 bg-gradient-to-br from-primary/10 via-base-100 to-secondary/10 p-8 h-[calc(80vh-100px)]">
+      <div className="rounded-3xl border border-base-300 bg-gradient-to-br from-primary/10 via-base-100 to-secondary/10 p-3 sm:p-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* LEFT – FORM */}
           <div className="lg:col-span-1">

@@ -28,7 +28,7 @@ export default function ReportsPage() {
         title="Performance Reports"
         content="Track your learning progress and improvements"
       />
-      <div className="rounded-3xl border border-base-300 bg-gradient-to-br from-primary/10 via-base-100 to-secondary/10 p-8 ">
+      <div className="rounded-3xl border border-base-300 bg-gradient-to-br from-primary/10 via-base-100 to-secondary/10 p-3 sm:p-8 ">
         <div className="flex gap-2  ">
           <button
             onClick={() => setReportType("weekly")}

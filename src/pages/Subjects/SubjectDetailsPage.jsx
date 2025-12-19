@@ -47,12 +47,16 @@ export default function SubjectDetailsPage() {
           </div>
         </div>
       </div>
-      {/* Content */}
-      {activeTab === "notes" && <SubjectNotesPage subjectId={subjectId} />}
-      {activeTab === "quizzes" && <SubjectQuizzesPage subjectId={subjectId} />}
-      {activeTab === "flashcards" && (
-        <SubjectFlashcardsPage subjectId={subjectId} />
-      )}
+      <div className="max-h-[calc(80vh-35px)] sm:max-h-[calc(80vh-15px)] overflow-y-auto">
+        {/* Content */}
+        {activeTab === "notes" && <SubjectNotesPage subjectId={subjectId} />}
+        {activeTab === "quizzes" && (
+          <SubjectQuizzesPage subjectId={subjectId} />
+        )}
+        {activeTab === "flashcards" && (
+          <SubjectFlashcardsPage subjectId={subjectId} />
+        )}
+      </div>
     </div>
   );
 }
