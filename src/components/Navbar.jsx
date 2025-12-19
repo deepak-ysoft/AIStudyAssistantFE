@@ -1,34 +1,59 @@
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { useNavigate } from "react-router-dom";
-import { MdBook, MdDarkMode, MdLightMode, MdMenu } from "react-icons/md";
+import { MdDarkMode, MdLightMode, MdMenu } from "react-icons/md";
+import { useEffect, useRef, useState } from "react";
+import ConfirmLogoutModal from "./ConfirmLogoutModal";
 
 export default function Navbar() {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef(null);
+
   const handleLogout = () => {
+    setShowLogoutModal(false);
+    setIsMenuOpen(false);
     logout();
     navigate("/auth/login");
   };
+
+  /* ✅ Close dropdown on outside click */
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
     <nav className="sticky top-0 z-50 h-16 bg-base-100 border-b border-base-300">
       <div className="flex h-full items-center justify-between px-4 md:px-6">
         {/* Mobile Menu */}
-        <label
-          htmlFor="main-drawer"
-          className="btn btn-ghost btn-circle md:hidden"
-        >
+        <label htmlFor="main-drawer" className="btn btn-circle md:hidden">
           <MdMenu className="text-xl" />
         </label>
 
+        <span className="ml-4 hidden md:block text-sm text-base-content/80 truncate max-w-[180px]">
+          Hi,{" "}
+          <span className="font-semibold text-base-content">
+            {user?.name?.split(" ")[0]}
+          </span>
+        </span>
+
         {/* Right Actions */}
-        <div className="flex items-center gap-2 ml-auto">
+        <div className="flex items-center gap-4 ml-auto">
+          {/* Theme Toggle */}
           <button
             onClick={toggleTheme}
-            className="btn btn-ghost btn-circle"
+            className="btn btn-circle"
             title={`Theme: ${theme}`}
           >
             {["dark", "dracula", "synthwave", "cyberpunk"].includes(theme) ? (
@@ -38,44 +63,61 @@ export default function Navbar() {
             )}
           </button>
 
+          {/* Avatar + Dropdown */}
           {user && (
-            <div className="dropdown dropdown-end">
-              <label tabIndex={0} className="btn btn-ghost btn-circle">
+            <div className="relative" ref={menuRef}>
+              <button
+                type="button"
+                className="btn btn-circle"
+                onClick={() => setIsMenuOpen((prev) => !prev)}
+              >
                 <img
-                  src={user?.avatar}
+                  src={user.avatar}
                   className="p-0.5 rounded-full bg-primary"
                   alt="Avatar"
                 />
-              </label>
+              </button>
 
-              <ul className="dropdown-content menu mt-3 p-2 shadow-lg bg-base-100 rounded-box w-56">
-                <li className="px-2 text-sm text-gray-500 truncate">
-                  {user.email}
-                </li>
-                <div className="divider my-1" />
-                <li>
+              {isMenuOpen && (
+                <div className="absolute right-0 mt-3 w-56 rounded-xl shadow-lg bg-base-100 border border-base-300 z-50 p-1">
+                  <div className="px-4 py-2 text-sm text-gray-500 truncate">
+                    {user.email}
+                  </div>
+
+                  <div className="divider mt-0 mb-1" />
+
                   <button
-                    type="button"
-                    onClick={() => navigate("/profile")}
-                    className="w-full text-left"
+                    className="w-full rounded-xl px-4 py-2 text-left hover:bg-base-200"
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      navigate("/profile");
+                    }}
                   >
                     Profile
                   </button>
-                </li>
-                <li>
+
                   <button
-                    type="button"
-                    onClick={handleLogout}
-                    className="w-full text-left"
+                    className="w-full px-4 py-2 rounded-xl text-left hover:bg-base-200"
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      setShowLogoutModal(true);
+                    }}
                   >
                     Logout
                   </button>
-                </li>
-              </ul>
+                </div>
+              )}
             </div>
           )}
         </div>
       </div>
+
+      {/* Logout Confirmation */}
+      <ConfirmLogoutModal
+        open={showLogoutModal}
+        onCancel={() => setShowLogoutModal(false)}
+        onConfirm={handleLogout}
+      />
     </nav>
   );
 }

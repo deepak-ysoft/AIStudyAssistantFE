@@ -3,21 +3,39 @@ import { useNavigate, Link } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { authApi } from "../../api/authApi";
 import { useAuth } from "../../context/AuthContext";
+import FormInput from "../../components/FormInput";
+import { PrimaryButton } from "../../components/PrimaryButton";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("Deepak@yopmail.com");
   const [password, setPassword] = useState("Deepak@123");
   const [error, setError] = useState("");
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, logout } = useAuth();
+
+  // useEffect(() => {
+  //   const validate = async () => {
+  //     try {
+  //       const res = await authApi.getProfile();
+  //       login(res.data.data, localStorage.getItem("token"));
+  //     } catch {
+  //       logout();
+  //     } finally {
+  //       setInitialized(true);
+  //     }
+  //   };
+
+  //   validate();
+  // }, []);
 
   const loginMutation = useMutation({
     mutationFn: (data) => authApi.login(data),
     onSuccess: (response) => {
-      const { user, token } = response.data.data;
-      console.log("user", user);
-      login(user, token);
-      navigate("/dashboard");
+      if (response.data.success) {
+        const { user, token } = response.data.data;
+        login(user, token);
+        navigate("/dashboard", { replace: true });
+      }
     },
     onError: (err) => {
       setError(err.response?.data?.message || "Login failed");
@@ -32,33 +50,23 @@ export default function LoginPage() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="form-control">
-        <label className="label">
-          <span className="label-text">Email</span>
-        </label>
-        <input
-          type="email"
-          placeholder="Enter your email"
-          className="input input-bordered"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-      </div>
+      <FormInput
+        label="Email"
+        type="email"
+        placeholder="Enter your email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        required
+      />
 
-      <div className="form-control">
-        <label className="label">
-          <span className="label-text">Password</span>
-        </label>
-        <input
-          type="password"
-          placeholder="Enter your password"
-          className="input input-bordered"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-      </div>
+      <FormInput
+        label="Password"
+        type="password"
+        placeholder="Enter new password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        required
+      />
 
       {error && (
         <div className="alert alert-error">
@@ -79,13 +87,13 @@ export default function LoginPage() {
         </div>
       )}
 
-      <button
+      <PrimaryButton
         type="submit"
         className="btn btn-primary w-full"
         disabled={loginMutation.isPending}
       >
         {loginMutation.isPending ? "Signing in..." : "Sign In"}
-      </button>
+      </PrimaryButton>
 
       <div className="divider my-4">OR</div>
 

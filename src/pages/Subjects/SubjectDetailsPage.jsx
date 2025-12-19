@@ -23,7 +23,7 @@ export default function SubjectDetailsPage() {
         {/* Back Button (Left) */}
         <button
           onClick={() => navigate(-1)}
-          className="btn btn-ghost gap-2 absolute left-[-10px] lg:left-0"
+          className="btn  gap-2 absolute left-[-10px] lg:left-0"
         >
           <HiArrowLeft className="text-lg" />
           <span className="hidden lg:inline">Back</span>

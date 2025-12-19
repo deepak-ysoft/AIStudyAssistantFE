@@ -277,11 +277,7 @@ export default function SubjectNotesPage({ subjectId }) {
           />
 
           <div className="flex justify-end gap-2 pt-4">
-            <button
-              type="button"
-              className="btn btn-ghost"
-              onClick={closeModal}
-            >
+            <button type="button" className="btn " onClick={closeModal}>
               Cancel
             </button>
             <PrimaryButton
@@ -311,7 +307,7 @@ export default function SubjectNotesPage({ subjectId }) {
           </div>
 
           <div className="flex justify-end pt-2">
-            <button className="btn btn-ghost" onClick={closeDetailsModal}>
+            <button className="btn " onClick={closeDetailsModal}>
               Close
             </button>
           </div>

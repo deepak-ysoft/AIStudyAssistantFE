@@ -33,16 +33,14 @@ export default function ReportsPage() {
           <button
             onClick={() => setReportType("weekly")}
             className={`btn tab ${
-              reportType === "weekly" ? "btn-primary" : "btn-ghost"
+              reportType === "weekly" ? "btn-primary" : ""
             }`}
           >
             Weekly Report
           </button>
           <button
             onClick={() => setReportType("monthly")}
-            className={`btn ${
-              reportType === "monthly" ? "btn-primary" : "btn-ghost"
-            }`}
+            className={`btn ${reportType === "monthly" ? "btn-primary" : ""}`}
           >
             Monthly Report
           </button>

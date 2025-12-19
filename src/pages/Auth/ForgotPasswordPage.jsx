@@ -1,46 +1,42 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useMutation } from '@tanstack/react-query';
-import { authApi } from '../../api/authApi';
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { useMutation } from "@tanstack/react-query";
+import { authApi } from "../../api/authApi";
+import FormInput from "../../components/FormInput";
+import { PrimaryButton } from "../../components/PrimaryButton";
 
 export default function ForgotPasswordPage() {
-  const [email, setEmail] = useState('');
-  const [success, setSuccess] = useState('');
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState("");
+  const [success, setSuccess] = useState("");
+  const [error, setError] = useState("");
 
   const forgotPasswordMutation = useMutation({
     mutationFn: (email) => authApi.forgotPassword(email),
     onSuccess: () => {
-      setSuccess('Password reset link has been sent to your email');
-      setEmail('');
+      setSuccess("Password reset link has been sent to your email");
+      setEmail("");
     },
     onError: (err) => {
-      setError(err.response?.data?.message || 'Failed to send reset link');
+      setError(err.response?.data?.message || "Failed to send reset link");
     },
   });
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
+    setError("");
+    setSuccess("");
     forgotPasswordMutation.mutate(email);
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="form-control">
-        <label className="label">
-          <span className="label-text">Email</span>
-        </label>
-        <input
-          type="email"
-          placeholder="Enter your email"
-          className="input input-bordered"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-      </div>
+      <FormInput
+        label="Email"
+        type="email"
+        placeholder="Enter your email"
+        onChange={(e) => setEmail(e.target.value)}
+        required
+      />
 
       {error && (
         <div className="alert alert-error">
@@ -80,16 +76,16 @@ export default function ForgotPasswordPage() {
         </div>
       )}
 
-      <button
+      <PrimaryButton
         type="submit"
         className="btn btn-primary w-full"
         disabled={forgotPasswordMutation.isPending}
       >
-        {forgotPasswordMutation.isPending ? 'Sending...' : 'Send Reset Link'}
-      </button>
+        {forgotPasswordMutation.isPending ? "Sending..." : "Send Reset Link"}
+      </PrimaryButton>
 
       <p className="text-center text-sm">
-        Remember your password?{' '}
+        Remember your password?{" "}
         <Link to="/auth/login" className="link link-primary">
           Sign in
         </Link>

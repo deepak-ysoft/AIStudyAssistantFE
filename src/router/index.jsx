@@ -17,6 +17,8 @@ import ReportsPage from "../pages/Reports/ReportsPage";
 import SubjectDetailsPage from "../pages/Subjects/SubjectDetailsPage";
 import SubjectNotesPage from "../pages/Subjects/Tabs/NotesPage";
 import ProfilePage from "../pages/Profile/ProfilePage";
+import ResetPasswordPage from "../pages/Auth/ResetPasswordPage";
+import { useLocation } from "react-router-dom";
 
 function ErrorFallback() {
   return (
@@ -53,9 +55,10 @@ function ProtectedLayout() {
 }
 
 function PublicLayout() {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, initialized } = useAuth();
+  const location = useLocation();
 
-  if (loading) {
+  if (!initialized || loading) {
     return (
       <div className="flex items-center justify-center h-screen">
         Loading...
@@ -63,18 +66,24 @@ function PublicLayout() {
     );
   }
 
-  if (isAuthenticated) {
+  // 🔒 Only redirect if user is authenticated AND already on auth pages
+  if (isAuthenticated && location.pathname.startsWith("/auth")) {
     return <Navigate to="/dashboard" replace />;
   }
 
   return <AuthLayout />;
 }
-
+  
 export const router = createBrowserRouter([
   {
     path: "/",
     errorElement: <ErrorFallback />,
-    element: <Navigate to="/dashboard" replace />,
+    element: <Navigate to="/auth/login" replace />,
+  },
+  {
+    path: "/login",
+    errorElement: <ErrorFallback />,
+    element: <Navigate to="/auth/login" replace />,
   },
   {
     path: "auth",
@@ -92,6 +101,10 @@ export const router = createBrowserRouter([
       {
         path: "forgot-password",
         element: <ForgotPasswordPage />,
+      },
+      {
+        path: "reset-password/:token",
+        element: <ResetPasswordPage />,
       },
     ],
   },

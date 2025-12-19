@@ -7,6 +7,7 @@ export const authApi = {
     axiosInstance.post("/auth/forgot-password", { email }),
   resetPassword: (token, newPassword) =>
     axiosInstance.post("/auth/reset-password", { token, newPassword }),
+  changePassword: (data) => axiosInstance.put("/auth/change-password", data),
   verifyEmail: (token) => axiosInstance.post("/auth/verify-email", { token }),
   resendVerificationEmail: (email) =>
     axiosInstance.post("/auth/resend-verification", { email }),

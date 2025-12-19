@@ -94,18 +94,42 @@ export default function ProfilePage() {
     setIsEditMode(false);
   };
 
+  const changePasswordMutation = useMutation({
+    mutationFn: () =>
+      authApi.changePassword({
+        currentPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword,
+      }),
+    onSuccess: () => {
+      setPasswordData({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+      setShowPasswordModal(false);
+      alert("Password changed successfully");
+    },
+    onError: (err) => {
+      alert(err.response?.data?.message || "Failed to change password");
+    },
+  });
+
   /* ---------------- CHANGE PASSWORD (UI ONLY) ---------------- */
 
   const handlePasswordSubmit = (e) => {
     e.preventDefault();
+
+    if (passwordData.newPassword.length < 6) {
+      alert("Password must be at least 6 characters");
+      return;
+    }
 
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       alert("Passwords do not match");
       return;
     }
 
-    console.log("Change password payload (API not ready):", passwordData);
-    setShowPasswordModal(false);
+    changePasswordMutation.mutate();
   };
 
   /* ---------------- UI ---------------- */
@@ -244,11 +268,7 @@ export default function ProfilePage() {
 
             {isEditMode && (
               <div className="md:col-span-2 flex justify-end gap-3 pt-4">
-                <button
-                  type="button"
-                  className="btn btn-ghost"
-                  onClick={cancelEdit}
-                >
+                <button type="button" className="btn " onClick={cancelEdit}>
                   Cancel
                 </button>
 
@@ -313,12 +333,17 @@ export default function ProfilePage() {
           <div className="flex justify-end gap-2 pt-4">
             <button
               type="button"
-              className="btn btn-ghost"
+              className="btn "
               onClick={() => setShowPasswordModal(false)}
             >
               Cancel
             </button>
-            <PrimaryButton type="submit">Update Password</PrimaryButton>
+            <PrimaryButton
+              type="submit"
+              loading={changePasswordMutation.isPending}
+            >
+              Update Password
+            </PrimaryButton>
           </div>
         </form>
       </AppModal>
