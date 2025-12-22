@@ -6,7 +6,6 @@ import { authApi } from "../../api/authApi";
 import PageHeader from "../../components/PageHeader";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import FormInput from "../../components/FormInput";
-import AppModal from "../../components/AppModal";
 import { IKContext, IKUpload } from "imagekitio-react";
 import { useAuth } from "../../context/AuthContext";
 
@@ -14,7 +13,6 @@ export default function ProfilePage() {
   const { user, setUserData } = useAuth();
   const [avatarPreview, setAvatarPreview] = useState("");
 
-  const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
 
   const [profileData, setProfileData] = useState({
@@ -28,12 +26,6 @@ export default function ProfilePage() {
   });
 
   const [originalProfile, setOriginalProfile] = useState(null);
-
-  const [passwordData, setPasswordData] = useState({
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
-  });
 
   /* ---------------- GET PROFILE ---------------- */
 
@@ -94,44 +86,6 @@ export default function ProfilePage() {
     setIsEditMode(false);
   };
 
-  const changePasswordMutation = useMutation({
-    mutationFn: () =>
-      authApi.changePassword({
-        currentPassword: passwordData.currentPassword,
-        newPassword: passwordData.newPassword,
-      }),
-    onSuccess: () => {
-      setPasswordData({
-        currentPassword: "",
-        newPassword: "",
-        confirmPassword: "",
-      });
-      setShowPasswordModal(false);
-      alert("Password changed successfully");
-    },
-    onError: (err) => {
-      alert(err.response?.data?.message || "Failed to change password");
-    },
-  });
-
-  /* ---------------- CHANGE PASSWORD (UI ONLY) ---------------- */
-
-  const handlePasswordSubmit = (e) => {
-    e.preventDefault();
-
-    if (passwordData.newPassword.length < 6) {
-      alert("Password must be at least 6 characters");
-      return;
-    }
-
-    if (passwordData.newPassword !== passwordData.confirmPassword) {
-      alert("Passwords do not match");
-      return;
-    }
-
-    changePasswordMutation.mutate();
-  };
-
   /* ---------------- UI ---------------- */
 
   return (
@@ -142,23 +96,13 @@ export default function ProfilePage() {
         content="Manage your personal information and account security"
       >
         <div className="flex gap-2">
-          <PrimaryButton
-            className="btn btn-outline"
-            onClick={isEditMode ? cancelEdit : startEdit}
-          >
+          <PrimaryButton onClick={isEditMode ? cancelEdit : startEdit}>
             {isEditMode ? "Cancel Edit" : "Edit Profile"}
-          </PrimaryButton>
-
-          <PrimaryButton
-            className="btn btn-outline"
-            onClick={() => setShowPasswordModal(true)}
-          >
-            Change Password
           </PrimaryButton>
         </div>
       </PageHeader>
 
-      <div className="rounded-3xl border border-base-300 bg-gradient-to-br from-primary/10 via-base-100 to-secondary/10 p-6">
+      <div className="rounded-3xl border border-base-300 bg-gradient-to-br from-primary/10 via-base-100 to-secondary/10 p-5 sm:p-8">
         {isLoading ? (
           <div className="flex justify-center py-20">
             <span className="loading loading-spinner loading-lg" />
@@ -283,70 +227,6 @@ export default function ProfilePage() {
           </form>
         )}
       </div>
-
-      {/* CHANGE PASSWORD MODAL */}
-      <AppModal
-        open={showPasswordModal}
-        title="Change Password"
-        onClose={() => setShowPasswordModal(false)}
-      >
-        <form onSubmit={handlePasswordSubmit} className="space-y-5">
-          <FormInput
-            label="Current Password"
-            type="password"
-            value={passwordData.currentPassword}
-            onChange={(e) =>
-              setPasswordData({
-                ...passwordData,
-                currentPassword: e.target.value,
-              })
-            }
-            required
-          />
-
-          <FormInput
-            label="New Password"
-            type="password"
-            value={passwordData.newPassword}
-            onChange={(e) =>
-              setPasswordData({
-                ...passwordData,
-                newPassword: e.target.value,
-              })
-            }
-            required
-          />
-
-          <FormInput
-            label="Confirm New Password"
-            type="password"
-            value={passwordData.confirmPassword}
-            onChange={(e) =>
-              setPasswordData({
-                ...passwordData,
-                confirmPassword: e.target.value,
-              })
-            }
-            required
-          />
-
-          <div className="flex justify-end gap-2 pt-4">
-            <button
-              type="button"
-              className="btn "
-              onClick={() => setShowPasswordModal(false)}
-            >
-              Cancel
-            </button>
-            <PrimaryButton
-              type="submit"
-              loading={changePasswordMutation.isPending}
-            >
-              Update Password
-            </PrimaryButton>
-          </div>
-        </form>
-      </AppModal>
     </div>
   );
 }

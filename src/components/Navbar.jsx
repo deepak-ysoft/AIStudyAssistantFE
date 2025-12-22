@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { MdDarkMode, MdLightMode, MdMenu } from "react-icons/md";
 import { useEffect, useRef, useState } from "react";
 import ConfirmLogoutModal from "./ConfirmLogoutModal";
+import { MdPerson, MdSettings, MdLogout } from "react-icons/md";
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -41,7 +42,7 @@ export default function Navbar() {
           <MdMenu className="text-xl" />
         </label>
 
-        <span className="ml-4 hidden md:block text-sm text-base-content/80 truncate max-w-[180px]">
+        <span className="ml-4 text-sm text-base-content/80 truncate max-w-[180px]">
           Hi,{" "}
           <span className="font-semibold text-base-content">
             {user?.name?.split(" ")[0]}
@@ -80,30 +81,49 @@ export default function Navbar() {
 
               {isMenuOpen && (
                 <div className="absolute right-0 mt-3 w-56 rounded-xl shadow-lg bg-base-100 border border-base-300 z-50 p-1">
+                  {/* Email */}
                   <div className="px-4 py-2 text-sm text-gray-500 truncate">
                     {user.email}
                   </div>
 
                   <div className="divider mt-0 mb-1" />
 
+                  {/* Profile */}
                   <button
-                    className="w-full rounded-xl px-4 py-2 text-left hover:bg-base-200"
+                    className="w-full flex items-center gap-3 rounded-xl px-4 py-2 text-left hover:bg-base-200 transition"
                     onClick={() => {
                       setIsMenuOpen(false);
                       navigate("/profile");
                     }}
                   >
-                    Profile
+                    <MdPerson className="text-primary text-lg" />
+                    <span>Profile</span>
                   </button>
 
+                  {/* Settings */}
                   <button
-                    className="w-full px-4 py-2 rounded-xl text-left hover:bg-base-200"
+                    className="w-full flex items-center gap-3 rounded-xl px-4 py-2 text-left hover:bg-base-200 transition"
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      navigate("/settings");
+                    }}
+                  >
+                    <MdSettings className="text-secondary text-lg" />
+                    <span>Settings</span>
+                  </button>
+
+                  <div className="divider my-1" />
+
+                  {/* Logout */}
+                  <button
+                    className="w-full flex items-center gap-3 rounded-xl px-4 py-2 text-left hover:bg-base-200 transition text-error"
                     onClick={() => {
                       setIsMenuOpen(false);
                       setShowLogoutModal(true);
                     }}
                   >
-                    Logout
+                    <MdLogout className="text-error text-lg" />
+                    <span>Logout</span>
                   </button>
                 </div>
               )}

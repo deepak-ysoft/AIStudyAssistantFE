@@ -11,9 +11,14 @@ export const authApi = {
   verifyEmail: (token) => axiosInstance.post("/auth/verify-email", { token }),
   resendVerificationEmail: (email) =>
     axiosInstance.post("/auth/resend-verification", { email }),
+  changeEmail: (newEmail) =>
+    axiosInstance.put("/auth/change-email", { newEmail }),
   getProfile: () => axiosInstance.get("/auth/profile"),
   updateProfile: (data) => axiosInstance.put("/auth/profile", data),
-
+  deleteAccount: (data) =>
+    axiosInstance.delete("/auth/delete-account", {
+      data, 
+    }),
   authenticator: async () => {
     const res = await axiosInstance.get("/auth/imagekit-auth");
 

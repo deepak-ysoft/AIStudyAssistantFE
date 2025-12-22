@@ -1,3 +1,6 @@
+import { useState } from "react";
+import { MdVisibility, MdVisibilityOff } from "react-icons/md";
+
 export default function FormInput({
   label,
   type = "text",
@@ -10,10 +13,43 @@ export default function FormInput({
   disabled,
   options = [], // for select / radio
 }) {
+  const [showPassword, setShowPassword] = useState(false);
+
   const base =
     "w-full rounded-xl border border-base-300 bg-base-100 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 disabled:opacity-60 disabled:cursor-not-allowed";
 
   const renderInput = () => {
+    /* ---------- PASSWORD INPUT WITH EYE ---------- */
+    if (type === "password") {
+      return (
+        <div className="relative">
+          <input
+            type={showPassword ? "text" : "password"}
+            className={`${base} pr-12`}
+            value={value}
+            onChange={onChange}
+            placeholder={placeholder}
+            required={required}
+            disabled={disabled}
+          />
+
+          <button
+            type="button"
+            onClick={() => setShowPassword((prev) => !prev)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/60 hover:text-base-content"
+            tabIndex={-1}
+          >
+            {showPassword ? (
+              <MdVisibilityOff size={20} />
+            ) : (
+              <MdVisibility size={20} />
+            )}
+          </button>
+        </div>
+      );
+    }
+
+    /* ---------- OTHER TYPES ---------- */
     switch (type) {
       case "textarea":
         return (

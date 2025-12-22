@@ -1,13 +1,10 @@
 import { Navigate, createBrowserRouter, Outlet } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-
 import MainLayout from "../layouts/MainLayout";
 import AuthLayout from "../layouts/AuthLayout";
-
 import LoginPage from "../pages/Auth/LoginPage";
 import SignupPage from "../pages/Auth/SignupPage";
 import ForgotPasswordPage from "../pages/Auth/ForgotPasswordPage";
-
 import Dashboard from "../pages/Dashboard/Dashboard";
 import SubjectsPage from "../pages/Subjects/SubjectsPage";
 import AIChatPage from "../pages/AIChat/AIChatPage";
@@ -19,6 +16,9 @@ import SubjectNotesPage from "../pages/Subjects/Tabs/NotesPage";
 import ProfilePage from "../pages/Profile/ProfilePage";
 import ResetPasswordPage from "../pages/Auth/ResetPasswordPage";
 import { useLocation } from "react-router-dom";
+import SettingsPage from "../pages/Profile/SettingsPage";
+import EmailVerifiedPage from "../pages/Auth/EmailVerification";
+import RestoreAccountRequestPage from "../pages/Auth/RestoreDeletedAccount";
 
 function ErrorFallback() {
   return (
@@ -57,6 +57,7 @@ function ProtectedLayout() {
 function PublicLayout() {
   const { isAuthenticated, loading, initialized } = useAuth();
   const location = useLocation();
+  console.log("isAuth", isAuthenticated);
 
   if (!initialized || loading) {
     return (
@@ -73,7 +74,7 @@ function PublicLayout() {
 
   return <AuthLayout />;
 }
-  
+
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -81,9 +82,13 @@ export const router = createBrowserRouter([
     element: <Navigate to="/auth/login" replace />,
   },
   {
-    path: "/login",
+    path: "login",
     errorElement: <ErrorFallback />,
     element: <Navigate to="/auth/login" replace />,
+  },
+  {
+    path: "auth/verify-email/:token",
+    element: <EmailVerifiedPage />,
   },
   {
     path: "auth",
@@ -105,6 +110,10 @@ export const router = createBrowserRouter([
       {
         path: "reset-password/:token",
         element: <ResetPasswordPage />,
+      },
+      {
+        path: "restore-account/:email",
+        element: <RestoreAccountRequestPage />,
       },
     ],
   },
@@ -147,6 +156,10 @@ export const router = createBrowserRouter([
       {
         path: "profile",
         element: <ProfilePage />,
+      },
+      {
+        path: "settings",
+        element: <SettingsPage />,
       },
     ],
   },
