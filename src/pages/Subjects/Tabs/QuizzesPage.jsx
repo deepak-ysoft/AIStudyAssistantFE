@@ -251,7 +251,7 @@ export default function SubjectQuizzesPage({ subjectId }) {
         title={isEditMode ? "Update Quiz" : "Create Quiz"}
         onClose={closeModal}
       >
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form noValidate onSubmit={handleSubmit} className="space-y-5">
           <FormInput
             label="Title"
             placeholder="Quiz title"

@@ -96,9 +96,14 @@ export default function ProfilePage() {
         content="Manage your personal information and account security"
       >
         <div className="flex gap-2">
-          <PrimaryButton onClick={isEditMode ? cancelEdit : startEdit}>
-            {isEditMode ? "Cancel Edit" : "Edit Profile"}
-          </PrimaryButton>
+          {!isEditMode && (
+            <PrimaryButton
+              onClick={isEditMode ? cancelEdit : startEdit}
+              loading={updateProfileMutation.isPending}
+            >
+              Edit Profile
+            </PrimaryButton>
+          )}
         </div>
       </PageHeader>
 
@@ -119,7 +124,7 @@ export default function ProfilePage() {
                 authenticator={authApi.authenticator}
               >
                 <div
-                  className={`relative h-28 w-28 rounded-full border-2 border-base-300 overflow-hidden cursor-pointer
+                  className={`relative  h-28 w-28 rounded-full border-2 border-base-300 overflow-hidden cursor-pointer
       ${!isEditMode ? "cursor-not-allowed opacity-80" : "hover:opacity-90"}
     `}
                 >
@@ -127,7 +132,7 @@ export default function ProfilePage() {
                     <img
                       src={avatarPreview}
                       alt="Avatar"
-                      className="h-full w-full object-cover"
+                      className="h-full w-full object-cover p-0.5 rounded-full bg-primary"
                     />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center bg-primary/10 text-primary text-3xl font-bold">

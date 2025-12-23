@@ -8,13 +8,21 @@ import { FiSend } from "react-icons/fi";
 import PageHeader from "../../components/PageHeader";
 
 export default function AIChatPage() {
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      text: "Hello! I'm your AI Study Assistant. Ask me anything about your studies!",
-      sender: "ai",
-    },
-  ]);
+  const [messages, setMessages] = useState(() => {
+    const saved = localStorage.getItem("ai-chat-messages");
+    if (saved) {
+      return JSON.parse(saved);
+    }
+
+    return [
+      {
+        id: 1,
+        text: "Hello! I'm your AI Study Assistant. Ask me anything about your studies!",
+        sender: "ai",
+      },
+    ];
+  });
+
   const [inputValue, setInputValue] = useState("");
   const messagesEndRef = useRef(null);
 
@@ -32,8 +40,23 @@ export default function AIChatPage() {
   });
 
   useEffect(() => {
+    localStorage.setItem("ai-chat-messages", JSON.stringify(messages));
+  }, [messages]);
+
+  useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  const clearChat = () => {
+    localStorage.removeItem("ai-chat-messages");
+    setMessages([
+      {
+        id: 1,
+        text: "Hello! I'm your AI Study Assistant. Ask me anything about your studies!",
+        sender: "ai",
+      },
+    ]);
+  };
 
   const handleSendMessage = (e) => {
     e.preventDefault();
@@ -51,7 +74,7 @@ export default function AIChatPage() {
   };
 
   return (
-    <div >
+    <div>
       {/* HEADER */}
       <PageHeader
         icon={MdSmartToy}
@@ -93,7 +116,11 @@ export default function AIChatPage() {
         </div>
 
         {/* Input */}
-        <form onSubmit={handleSendMessage} className="flex gap-2 mt-6">
+        <form
+          noValidate
+          onSubmit={handleSendMessage}
+          className="flex gap-2 mt-6"
+        >
           <FormInput
             containerClassName="flex-1"
             placeholder="Ask anything..."
@@ -102,12 +129,10 @@ export default function AIChatPage() {
             disabled={chatMutation.isPending}
           />
 
-          <PrimaryButton
-            type="submit"
-            disabled={chatMutation.isPending || !inputValue.trim()}
-          >
+          <PrimaryButton type="submit" loading={chatMutation.isPending}>
             <FiSend className="text-xl" />
           </PrimaryButton>
+          <PrimaryButton onClick={clearChat}>Clear</PrimaryButton>
         </form>
       </div>
     </div>

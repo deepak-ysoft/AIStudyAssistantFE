@@ -46,9 +46,9 @@ export default function ConfirmLogoutModal({
           <PrimaryButton
             className="btn bg-info hover:bg-info/90 text-info-content px-8 shadow-lg shadow-info/30"
             onClick={onConfirm}
-            disabled={loading}
+            loading={loading}
           >
-            {loading ? "Logging out..." : "Logout"}
+            Logout
           </PrimaryButton>
         </div>
       </div>

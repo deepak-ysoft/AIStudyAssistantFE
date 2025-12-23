@@ -47,9 +47,9 @@ export default function ConfirmDeleteModal({
           <PrimaryButton
             className="btn bg-error hover:bg-error/90 text-error-content px-8 shadow-lg shadow-error/30"
             onClick={onConfirm}
-            disabled={loading}
+            loading={loading}
           >
-            {loading ? "Deleting..." : confirmText}
+            {confirmText}
           </PrimaryButton>
         </div>
       </div>

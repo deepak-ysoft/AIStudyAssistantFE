@@ -2,13 +2,14 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { MdNotes } from "react-icons/md";
 import { notesApi } from "../../../api/notesApi";
+import { flashcardApi } from "../../../api/flashcardApi";
 import ConfirmDeleteModal from "../../../components/ConfirmDeleteModal";
 import AppModal from "../../../components/AppModal";
 import FormInput from "../../../components/FormInput";
 import { PrimaryButton } from "../../../components/PrimaryButton";
 import { FiEdit2, FiTrash2, FiEye } from "react-icons/fi";
 import { HiOutlineSparkles } from "react-icons/hi2";
-import { TbCards, TbPaperclip } from "react-icons/tb";
+import { TbCards } from "react-icons/tb";
 import PageHeader from "../../../components/PageHeader";
 
 export default function SubjectNotesPage({ subjectId }) {
@@ -74,7 +75,7 @@ export default function SubjectNotesPage({ subjectId }) {
   });
 
   const flashcardMutation = useMutation({
-    mutationFn: notesApi.generateFlashcards,
+    mutationFn: flashcardApi.generateFlashcards,
     onSuccess: () => {
       alert("Flashcards generated successfully");
     },
@@ -255,7 +256,7 @@ export default function SubjectNotesPage({ subjectId }) {
         title={isEditMode ? "Update Note" : "Create Note"}
         onClose={closeModal}
       >
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form noValidate onSubmit={handleSubmit} className="space-y-5">
           <FormInput
             label="Title"
             placeholder="Give your note a title"

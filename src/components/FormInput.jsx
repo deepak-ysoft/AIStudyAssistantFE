@@ -6,31 +6,54 @@ export default function FormInput({
   type = "text",
   value,
   onChange,
-  className,
-  containerClassName,
+  onBlur,
   placeholder,
-  required,
-  disabled,
-  options = [], // for select / radio
+  required = false,
+  disabled = false,
+  options = [], // select / radio
+  className = "",
+  containerClassName = "",
+
+  /* ---- validation props ---- */
+  error,
+  pattern,
+  minLength,
+  maxLength,
+  min,
+  max,
 }) {
   const [showPassword, setShowPassword] = useState(false);
 
   const base =
-    "w-full rounded-xl border border-base-300 bg-base-100 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 disabled:opacity-60 disabled:cursor-not-allowed";
+    "w-full rounded-xl border bg-base-100 px-4 py-3 text-sm focus:outline-none focus:ring-2 disabled:opacity-60 disabled:cursor-not-allowed";
+
+  const borderClass = error
+    ? "border-error focus:ring-error/40"
+    : "border-base-300 focus:ring-primary/40";
+
+  const commonProps = {
+    value,
+    onChange,
+    onBlur,
+    placeholder,
+    required,
+    disabled,
+    pattern,
+    minLength,
+    maxLength,
+    min,
+    max,
+  };
 
   const renderInput = () => {
-    /* ---------- PASSWORD INPUT WITH EYE ---------- */
+    /* ---------- PASSWORD ---------- */
     if (type === "password") {
       return (
         <div className="relative">
           <input
             type={showPassword ? "text" : "password"}
-            className={`${base} pr-12`}
-            value={value}
-            onChange={onChange}
-            placeholder={placeholder}
-            required={required}
-            disabled={disabled}
+            className={`${base} ${borderClass} pr-12 ${className}`}
+            {...commonProps}
           />
 
           <button
@@ -49,107 +72,107 @@ export default function FormInput({
       );
     }
 
-    /* ---------- OTHER TYPES ---------- */
-    switch (type) {
-      case "textarea":
-        return (
-          <textarea
-            className={`${base} min-h-[160px] resize-none`}
-            value={value}
-            onChange={onChange}
-            placeholder={placeholder}
-            required={required}
-            disabled={disabled}
-          />
-        );
-
-      case "select":
-        return (
-          <select
-            className={base}
-            value={value}
-            onChange={onChange}
-            required={required}
-            disabled={disabled}
-          >
-            <option value="" disabled>
-              {placeholder || "Select an option"}
-            </option>
-            {options.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
-        );
-
-      case "checkbox":
-        return (
-          <input
-            type="checkbox"
-            className="h-5 w-5 rounded border-base-300 focus:ring-primary"
-            checked={!!value}
-            onChange={(e) => onChange(e.target.checked)}
-            disabled={disabled}
-          />
-        );
-
-      case "radio":
-        return (
-          <div className="flex gap-4">
-            {options.map((opt) => (
-              <label
-                key={opt.value}
-                className="flex items-center gap-2 text-sm"
-              >
-                <input
-                  type="radio"
-                  value={opt.value}
-                  checked={value === opt.value}
-                  onChange={onChange}
-                  disabled={disabled}
-                  className="radio radio-primary"
-                />
-                {opt.label}
-              </label>
-            ))}
-          </div>
-        );
-
-      case "file":
-        return (
-          <input
-            type="file"
-            className="file-input file-input-bordered w-full"
-            onChange={onChange}
-            required={required}
-            disabled={disabled}
-          />
-        );
-
-      default:
-        return (
-          <input
-            type={type}
-            className={className ? className : base}
-            value={value}
-            onChange={onChange}
-            placeholder={placeholder}
-            required={required}
-            disabled={disabled}
-          />
-        );
+    /* ---------- TEXTAREA ---------- */
+    if (type === "textarea") {
+      return (
+        <textarea
+          className={`${base} ${borderClass} min-h-[120px] resize-none ${className}`}
+          {...commonProps}
+        />
+      );
     }
+
+    /* ---------- SELECT ---------- */
+    if (type === "select") {
+      return (
+        <select
+          className={`${base} ${borderClass} ${className}`}
+          value={value}
+          onChange={onChange}
+          required={required}
+          disabled={disabled}
+        >
+          <option value="" disabled>
+            {placeholder || "Select an option"}
+          </option>
+          {options.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
+      );
+    }
+
+    /* ---------- CHECKBOX ---------- */
+    if (type === "checkbox") {
+      return (
+        <input
+          type="checkbox"
+          checked={!!value}
+          onChange={(e) => onChange(e.target.checked)}
+          disabled={disabled}
+          className="h-5 w-5 rounded border-base-300 focus:ring-primary"
+        />
+      );
+    }
+
+    /* ---------- RADIO ---------- */
+    if (type === "radio") {
+      return (
+        <div className="flex gap-4">
+          {options.map((opt) => (
+            <label key={opt.value} className="flex items-center gap-2 text-sm">
+              <input
+                type="radio"
+                value={opt.value}
+                checked={value === opt.value}
+                onChange={onChange}
+                disabled={disabled}
+                className="radio radio-primary"
+              />
+              {opt.label}
+            </label>
+          ))}
+        </div>
+      );
+    }
+
+    /* ---------- FILE ---------- */
+    if (type === "file") {
+      return (
+        <input
+          type="file"
+          onChange={onChange}
+          required={required}
+          disabled={disabled}
+          className="file-input file-input-bordered w-full"
+        />
+      );
+    }
+
+    /* ---------- DEFAULT (text, email, number, etc.) ---------- */
+    return (
+      <input
+        type={type}
+        className={`${base} ${borderClass} ${className}`}
+        {...commonProps}
+      />
+    );
   };
 
   return (
-    <div className={`space-y-1.5 ${containerClassName || ""}`}>
+    <div className={`space-y-1.5 ${containerClassName}`}>
       {label && (
         <label className="text-sm font-medium text-base-content/80">
           {label}
+          {required && <span className="text-error ml-1">*</span>}
         </label>
       )}
+
       {renderInput()}
+
+      {error && <p className="text-xs text-error">{error}</p>}
     </div>
   );
 }

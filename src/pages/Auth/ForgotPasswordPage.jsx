@@ -29,7 +29,7 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form noValidate onSubmit={handleSubmit} className="space-y-4">
       <FormInput
         label="Email"
         type="email"
@@ -79,9 +79,9 @@ export default function ForgotPasswordPage() {
       <PrimaryButton
         type="submit"
         className="btn btn-primary w-full"
-        disabled={forgotPasswordMutation.isPending}
+        loading={forgotPasswordMutation.isPending}
       >
-        {forgotPasswordMutation.isPending ? "Sending..." : "Send Reset Link"}
+        Send Reset Link
       </PrimaryButton>
 
       <p className="text-center text-sm">

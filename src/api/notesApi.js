@@ -10,5 +10,4 @@ export const notesApi = {
     headers: { 'Content-Type': 'multipart/form-data' }
   }),
   generateSummary: (id) => axiosInstance.post(`/notes/${id}/summarize`),
-  generateFlashcards: (id) => axiosInstance.post(`/notes/${id}/flashcards`),
 };

@@ -2,13 +2,15 @@ export function PrimaryButton({
   children,
   onClick,
   className,
+  disabled,
   loading,
+
   ...props
 }) {
   return (
     <button
       {...props}
-      disabled={loading}
+      disabled={loading || disabled}
       onClick={onClick}
       className={
         className

@@ -3,6 +3,8 @@ import axiosInstance from "./axiosInstance";
 export const authApi = {
   signup: (data) => axiosInstance.post("/auth/signup", data),
   login: (data) => axiosInstance.post("/auth/login", data),
+  sendRestoreOtp: (data) => axiosInstance.post("/auth/send-otp", data),
+  verifyRestoreOtp: (data) => axiosInstance.post("/auth/verify", data),
   forgotPassword: (email) =>
     axiosInstance.post("/auth/forgot-password", { email }),
   resetPassword: (token, newPassword) =>
@@ -17,7 +19,7 @@ export const authApi = {
   updateProfile: (data) => axiosInstance.put("/auth/profile", data),
   deleteAccount: (data) =>
     axiosInstance.delete("/auth/delete-account", {
-      data, 
+      data,
     }),
   authenticator: async () => {
     const res = await axiosInstance.get("/auth/imagekit-auth");

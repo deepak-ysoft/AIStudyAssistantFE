@@ -2,6 +2,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
+import { authApi } from "../../api/authApi";
+import FormInput from "../../components/FormInput";
 // import { authApi } from "../../api/authApi"; // enable when API is ready
 
 export default function RestoreAccountRequestPage() {
@@ -14,12 +16,10 @@ export default function RestoreAccountRequestPage() {
   const [otp, setOtp] = useState("");
 
   /* ---------------- SEND OTP (API READY) ---------------- */
+
   const sendOtpMutation = useMutation({
-    mutationFn: async () => {
-      // 🔗 API placeholder
-      // return authApi.sendRestoreOtp(email);
-      return new Promise((resolve) => setTimeout(resolve, 1000));
-    },
+    // send OTP
+    mutationFn: () => authApi.sendRestoreOtp({ email }),
     onSuccess: () => {
       setStep("otp");
     },
@@ -30,11 +30,8 @@ export default function RestoreAccountRequestPage() {
 
   /* ---------------- VERIFY OTP (API READY) ---------------- */
   const verifyOtpMutation = useMutation({
-    mutationFn: async () => {
-      // 🔗 API placeholder
-      // return authApi.verifyRestoreOtp({ email, otp });
-      return new Promise((resolve) => setTimeout(resolve, 1000));
-    },
+    // verify OTP
+    mutationFn: () => authApi.verifyRestoreOtp({ email, otp }),
     onSuccess: () => {
       setStep("success");
     },
@@ -58,12 +55,15 @@ export default function RestoreAccountRequestPage() {
             </p>
 
             <div className="flex flex-col gap-3">
-              <PrimaryButton onClick={() => sendOtpMutation.mutate()}>
+              <PrimaryButton
+                onClick={() => sendOtpMutation.mutate()}
+                loading={sendOtpMutation.isPending}
+              >
                 Yes, Restore My Account
               </PrimaryButton>
 
               <button
-                onClick={() => navigate("/login")}
+                onClick={() => navigate("/auth/login")}
                 className="text-sm text-gray-500 hover:underline"
               >
                 No, I don’t want to restore
@@ -84,20 +84,21 @@ export default function RestoreAccountRequestPage() {
               account.
             </p>
 
-            <input
+            <FormInput
               type="text"
               value={otp}
               onChange={(e) => setOtp(e.target.value)}
               placeholder="Enter OTP"
-              className="input input-bordered w-full mb-4"
             />
-
-            <PrimaryButton
-              onClick={() => verifyOtpMutation.mutate()}
-              disabled={!otp}
-            >
-              Verify & Restore Account
-            </PrimaryButton>
+            <div className="mt-5">
+              <PrimaryButton
+                onClick={() => verifyOtpMutation.mutate()}
+                disabled={!otp}
+                loading={verifyOtpMutation.isPending}
+              >
+                Verify & Restore Account
+              </PrimaryButton>
+            </div>
           </>
         )}
 
@@ -112,7 +113,7 @@ export default function RestoreAccountRequestPage() {
               and continue using your account.
             </p>
 
-            <PrimaryButton onClick={() => navigate("/login")}>
+            <PrimaryButton onClick={() => navigate("/auth/login")}>
               Go to Login
             </PrimaryButton>
           </>

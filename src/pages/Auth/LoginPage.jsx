@@ -13,23 +13,9 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const { login, logout } = useAuth();
 
-  // useEffect(() => {
-  //   const validate = async () => {
-  //     try {
-  //       const res = await authApi.getProfile();
-  //       login(res.data.data, localStorage.getItem("token"));
-  //     } catch {
-  //       logout();
-  //     } finally {
-  //       setInitialized(true);
-  //     }
-  //   };
-
-  //   validate();
-  // }, []);
-
   const loginMutation = useMutation({
     mutationFn: (data) => authApi.login(data),
+
     onSuccess: (response) => {
       if (response.data.success) {
         const { user, token } = response.data.data;
@@ -37,8 +23,18 @@ export default function LoginPage() {
         navigate("/dashboard", { replace: true });
       }
     },
+
     onError: (err) => {
-      setError(err.response?.data?.message || "Login failed");
+      logout();
+
+      const message = err.response?.data?.message;
+
+      if (message === "ACCOUNT_DELETED") {
+        navigate(`/restore-account?email=${encodeURIComponent(email)}`);
+        return;
+      }
+
+      setError(message || "Invalid email or password");
     },
   });
 
@@ -49,7 +45,7 @@ export default function LoginPage() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form noValidate onSubmit={handleSubmit} className="space-y-4">
       <FormInput
         label="Email"
         type="email"
@@ -90,9 +86,9 @@ export default function LoginPage() {
       <PrimaryButton
         type="submit"
         className="btn btn-primary w-full"
-        disabled={loginMutation.isPending}
+        loading={loginMutation.isPending}
       >
-        {loginMutation.isPending ? "Signing in..." : "Sign In"}
+        Sign In
       </PrimaryButton>
 
       <div className="divider my-4">OR</div>

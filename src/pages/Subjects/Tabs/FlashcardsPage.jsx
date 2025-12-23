@@ -256,7 +256,7 @@ export default function SubjectFlashcardsPage({ subjectId }) {
         title={isEditMode ? "Edit Flashcard" : "Create Flashcard"}
         onClose={closeModal}
       >
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form noValidate onSubmit={handleSubmit} className="space-y-5">
           <FormInput
             label="Question"
             type="textarea"

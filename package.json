@@ -15,6 +15,7 @@
     "crypto": "^1.0.1",
     "daisyui": "^3.7.7",
     "imagekitio-react": "^4.3.0",
+    "jspdf": "^3.0.4",
     "nodemailer": "^7.0.11",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

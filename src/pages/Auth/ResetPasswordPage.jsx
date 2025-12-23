@@ -43,7 +43,11 @@ export default function ResetPasswordPage() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5 max-w-md mx-auto mt-10">
+    <form
+      noValidate
+      onSubmit={handleSubmit}
+      className="space-y-5 max-w-md mx-auto mt-10"
+    >
       <h2 className="text-2xl font-bold text-center">Reset Password</h2>
 
       <FormInput
@@ -80,9 +84,9 @@ export default function ResetPasswordPage() {
       <PrimaryButton
         type="submit"
         className="btn btn-primary w-full"
-        disabled={resetPasswordMutation.isPending}
+        loading={resetPasswordMutation.isPending}
       >
-        {resetPasswordMutation.isPending ? "Resetting..." : "Reset Password"}
+        Reset Password
       </PrimaryButton>
       <p className="text-center text-sm">
         Don't want to change?{" "}

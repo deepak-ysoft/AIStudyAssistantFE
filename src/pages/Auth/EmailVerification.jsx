@@ -89,12 +89,12 @@ export default function EmailVerifiedPage() {
             <PrimaryButton onClick={() => resendMutation.mutate()}>
               Resend Verification Email
             </PrimaryButton>
-            <PrimaryButton onClick={() => navigate("/login")}>
+            <PrimaryButton onClick={() => navigate("/auth/login")}>
               Back to Login
             </PrimaryButton>
           </div>
         ) : (
-          <PrimaryButton onClick={() => navigate("/login")}>
+          <PrimaryButton onClick={() => navigate("/auth/login")}>
             Continue
           </PrimaryButton>
         )}

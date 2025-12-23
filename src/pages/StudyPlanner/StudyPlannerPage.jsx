@@ -6,6 +6,7 @@ import { PrimaryButton } from "../../components/PrimaryButton";
 import FormInput from "../../components/FormInput";
 import { FiCalendar } from "react-icons/fi";
 import PageHeader from "../../components/PageHeader";
+import jsPDF from "jspdf";
 
 export default function StudyPlannerPage() {
   const [formData, setFormData] = useState({
@@ -27,8 +28,69 @@ export default function StudyPlannerPage() {
     generatePlanMutation.mutate(formData);
   };
 
+  const handlePrint = () => {
+    const printWindow = window.open("", "", "width=800,height=600");
+
+    printWindow.document.write(`
+    <html>
+      <head>
+        <title>Weekly Study Plan</title>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            line-height: 1.6;
+          }
+          h1 {
+            text-align: center;
+          }
+          pre {
+            white-space: pre-wrap;
+          }
+        </style>
+      </head>
+      <body>
+        <h1>Weekly Study Plan</h1>
+        <pre>${plan}</pre>
+      </body>
+    </html>
+  `);
+
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+  };
+  const handleDownloadTxt = () => {
+    const blob = new Blob([plan], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "weekly-study-plan.txt";
+    link.click();
+
+    URL.revokeObjectURL(url);
+  };
+
+  const handleDownloadPdf = () => {
+    const doc = new jsPDF();
+
+    doc.setFont("helvetica");
+    doc.setFontSize(12);
+
+    const marginLeft = 15;
+    const marginTop = 20;
+
+    doc.text("Weekly Study Plan", marginLeft, 15);
+
+    const lines = doc.splitTextToSize(plan, 180);
+    doc.text(lines, marginLeft, marginTop);
+
+    doc.save("weekly-study-plan.pdf");
+  };
+
   return (
-    <div >
+    <div>
       {/* heaer */}
       <PageHeader
         icon={MdCalendarToday}
@@ -49,7 +111,11 @@ export default function StudyPlannerPage() {
               </div>
 
               <div className="card-body space-y-5">
-                <form onSubmit={handleGeneratePlan} className="space-y-4">
+                <form
+                  noValidate
+                  onSubmit={handleGeneratePlan}
+                  className="space-y-4"
+                >
                   {/* Available Hours */}
                   <div className="form-control">
                     <FormInput
@@ -94,14 +160,9 @@ export default function StudyPlannerPage() {
                   {/* Submit */}
                   <PrimaryButton
                     type="submit"
-                    className="btn btn-primary w-full"
-                    disabled={generatePlanMutation.isPending}
+                    loading={generatePlanMutation.isPending}
                   >
-                    {generatePlanMutation.isPending ? (
-                      <span className="loading loading-spinner loading-sm" />
-                    ) : (
-                      "Generate Plan"
-                    )}
+                    Generate Plan
                   </PrimaryButton>
                 </form>
               </div>
@@ -125,14 +186,33 @@ export default function StudyPlannerPage() {
                 <div className="card-body space-y-4">
                   <div className="bg-base-100 rounded-2xl p-4 max-h-96 overflow-auto text-sm leading-relaxed">
                     <pre className="whitespace-pre-wrap">
-                      {JSON.stringify(plan, null, 2)}
+                      <pre className="whitespace-pre-wrap">{plan}</pre>
                     </pre>
                   </div>
 
                   <div className="flex justify-end">
-                    <button className="btn btn-outline btn-primary rounded-full">
-                      Download Plan
-                    </button>
+                    <div className="flex gap-3 justify-end mt-4">
+                      <button
+                        onClick={handlePrint}
+                        className="btn btn-outline btn-primary rounded-full"
+                      >
+                        Print
+                      </button>
+
+                      <button
+                        onClick={handleDownloadTxt}
+                        className="btn btn-outline btn-secondary rounded-full"
+                      >
+                        Download TXT
+                      </button>
+
+                      <button
+                        onClick={handleDownloadPdf}
+                        className="btn btn-outline btn-accent rounded-full"
+                      >
+                        Download PDF
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>

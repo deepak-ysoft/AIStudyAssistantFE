@@ -196,6 +196,7 @@ export default function SettingsPage() {
             <PrimaryButton
               className="btn btn-error"
               onClick={() => setShowDeleteModal(true)}
+              loading={deleteAccountMutation.isPending}
             >
               Delete Account
             </PrimaryButton>

@@ -218,7 +218,7 @@ export default function SubjectsPage() {
         title={isEditMode ? "Update Subject" : "Create Subject"}
         onClose={closeModal}
       >
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form noValidate onSubmit={handleSubmit} className="space-y-5">
           <FormInput
             label="Name"
             placeholder="Subject name"

@@ -73,8 +73,11 @@ export default function Navbar() {
                 onClick={() => setIsMenuOpen((prev) => !prev)}
               >
                 <img
-                  src={user.avatar}
-                  className="p-0.5 rounded-full bg-primary"
+                  src={
+                    user.avatar ||
+                    "https://ik.imagekit.io/z0kfygnm4/AI_Assistant/avtar?updatedAt=1766064351087"
+                  }
+                  className="p-0.5 h-12 w-12 rounded-full bg-primary"
                   alt="Avatar"
                 />
               </button>

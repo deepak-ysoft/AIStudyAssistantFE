@@ -1,170 +1,80 @@
-import { Navigate, createBrowserRouter, Outlet } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
-import MainLayout from "../layouts/MainLayout";
+// src/routes/router.jsx
+import { Navigate, createBrowserRouter } from "react-router-dom";
+import RequireAuth from "./RequireAuth.jsx";
+
 import AuthLayout from "../layouts/AuthLayout";
+import MainLayout from "../layouts/MainLayout";
+
 import LoginPage from "../pages/Auth/LoginPage";
 import SignupPage from "../pages/Auth/SignupPage";
 import ForgotPasswordPage from "../pages/Auth/ForgotPasswordPage";
+import ResetPasswordPage from "../pages/Auth/ResetPasswordPage";
+import EmailVerifiedPage from "../pages/Auth/EmailVerification";
+import RestoreAccountRequestPage from "../pages/Auth/RestoreDeletedAccount";
+
 import Dashboard from "../pages/Dashboard/Dashboard";
 import SubjectsPage from "../pages/Subjects/SubjectsPage";
+import SubjectDetailsPage from "../pages/Subjects/SubjectDetailsPage";
+import SubjectNotesPage from "../pages/Subjects/Tabs/NotesPage";
 import AIChatPage from "../pages/AIChat/AIChatPage";
 import StudyPlannerPage from "../pages/StudyPlanner/StudyPlannerPage";
 import PomodoroPage from "../pages/Pomodoro/PomodoroPage";
 import ReportsPage from "../pages/Reports/ReportsPage";
-import SubjectDetailsPage from "../pages/Subjects/SubjectDetailsPage";
-import SubjectNotesPage from "../pages/Subjects/Tabs/NotesPage";
 import ProfilePage from "../pages/Profile/ProfilePage";
-import ResetPasswordPage from "../pages/Auth/ResetPasswordPage";
-import { useLocation } from "react-router-dom";
 import SettingsPage from "../pages/Profile/SettingsPage";
-import EmailVerifiedPage from "../pages/Auth/EmailVerification";
-import RestoreAccountRequestPage from "../pages/Auth/RestoreDeletedAccount";
 
 function ErrorFallback() {
   return (
-    <div className="flex items-center justify-center h-screen bg-base-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Oops! Something went wrong</h1>
-        <p className="text-lg text-base-content/70 mb-6">
-          Please try again or contact support
-        </p>
-        <a href="/" className="btn btn-primary">
-          Go Home
-        </a>
-      </div>
+    <div className="flex items-center justify-center h-screen">
+      <h1>Something went wrong</h1>
     </div>
   );
-}
-
-function ProtectedLayout() {
-  const { isAuthenticated, loading } = useAuth();
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        Loading...
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return <Navigate to="/auth/login" replace />;
-  }
-
-  return <MainLayout />;
-}
-
-function PublicLayout() {
-  const { isAuthenticated, loading, initialized } = useAuth();
-  const location = useLocation();
-  console.log("isAuth", isAuthenticated);
-
-  if (!initialized || loading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        Loading...
-      </div>
-    );
-  }
-
-  // 🔒 Only redirect if user is authenticated AND already on auth pages
-  if (isAuthenticated && location.pathname.startsWith("/auth")) {
-    return <Navigate to="/dashboard" replace />;
-  }
-
-  return <AuthLayout />;
 }
 
 export const router = createBrowserRouter([
   {
     path: "/",
-    errorElement: <ErrorFallback />,
-    element: <Navigate to="/auth/login" replace />,
+    element: <Navigate to="/dashboard" replace />,
   },
+
   {
-    path: "login",
-    errorElement: <ErrorFallback />,
-    element: <Navigate to="/auth/login" replace />,
+    path: "restore-account",
+    element: <RestoreAccountRequestPage />,
   },
-  {
-    path: "auth/verify-email/:token",
-    element: <EmailVerifiedPage />,
-  },
+  // 🔓 PUBLIC ROUTES
   {
     path: "auth",
-    element: <PublicLayout />,
-    errorElement: <ErrorFallback />,
+    element: <AuthLayout />,
     children: [
-      {
-        path: "login",
-        element: <LoginPage />,
-      },
-      {
-        path: "signup",
-        element: <SignupPage />,
-      },
-      {
-        path: "forgot-password",
-        element: <ForgotPasswordPage />,
-      },
-      {
-        path: "reset-password/:token",
-        element: <ResetPasswordPage />,
-      },
-      {
-        path: "restore-account/:email",
-        element: <RestoreAccountRequestPage />,
-      },
+      { path: "login", element: <LoginPage /> },
+      { path: "signup", element: <SignupPage /> },
+      { path: "forgot-password", element: <ForgotPasswordPage /> },
+      { path: "reset-password/:token", element: <ResetPasswordPage /> },
     ],
   },
+
+  { path: "auth/verify-email/:token", element: <EmailVerifiedPage /> },
+
+  // 🔒 PROTECTED ROUTES
   {
-    element: <ProtectedLayout />,
-    errorElement: <ErrorFallback />,
+    element: (
+      <RequireAuth>
+        <MainLayout />
+      </RequireAuth>
+    ),
     children: [
-      {
-        path: "dashboard",
-        element: <Dashboard />,
-      },
-      {
-        path: "subjects",
-        element: <SubjectsPage />,
-      },
-      {
-        path: "subjects/:subjectId",
-        element: <SubjectDetailsPage />,
-      },
-      {
-        path: "subjects/:subjectId/notes",
-        element: <SubjectNotesPage />,
-      },
-      {
-        path: "ai-chat",
-        element: <AIChatPage />,
-      },
-      {
-        path: "study-planner",
-        element: <StudyPlannerPage />,
-      },
-      {
-        path: "pomodoro",
-        element: <PomodoroPage />,
-      },
-      {
-        path: "reports",
-        element: <ReportsPage />,
-      },
-      {
-        path: "profile",
-        element: <ProfilePage />,
-      },
-      {
-        path: "settings",
-        element: <SettingsPage />,
-      },
+      { path: "dashboard", element: <Dashboard /> },
+      { path: "subjects", element: <SubjectsPage /> },
+      { path: "subjects/:subjectId", element: <SubjectDetailsPage /> },
+      { path: "subjects/:subjectId/notes", element: <SubjectNotesPage /> },
+      { path: "ai-chat", element: <AIChatPage /> },
+      { path: "study-planner", element: <StudyPlannerPage /> },
+      { path: "pomodoro", element: <PomodoroPage /> },
+      { path: "reports", element: <ReportsPage /> },
+      { path: "profile", element: <ProfilePage /> },
+      { path: "settings", element: <SettingsPage /> },
     ],
   },
-  {
-    path: "*",
-    element: <ErrorFallback />,
-  },
+
+  { path: "*", element: <ErrorFallback /> },
 ]);

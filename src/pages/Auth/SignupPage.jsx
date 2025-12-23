@@ -1,17 +1,19 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { useMutation } from '@tanstack/react-query';
-import { authApi } from '../../api/authApi';
-import { useAuth } from '../../context/AuthContext';
+import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { useMutation } from "@tanstack/react-query";
+import { authApi } from "../../api/authApi";
+import { useAuth } from "../../context/AuthContext";
+import FormInput from "../../components/FormInput";
+import { PrimaryButton } from "../../components/PrimaryButton";
 
 export default function SignupPage() {
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
   });
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const navigate = useNavigate();
   const { login } = useAuth();
 
@@ -20,10 +22,10 @@ export default function SignupPage() {
     onSuccess: (response) => {
       const { user, token } = response.data.data;
       login(user, token);
-      navigate('/dashboard');
+      navigate("/dashboard");
     },
     onError: (err) => {
-      setError(err.response?.data?.message || 'Signup failed');
+      setError(err.response?.data?.message || "Signup failed");
     },
   });
 
@@ -34,10 +36,10 @@ export default function SignupPage() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
 
     if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
+      setError("Passwords do not match");
       return;
     }
 
@@ -46,67 +48,44 @@ export default function SignupPage() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="form-control">
-        <label className="label">
-          <span className="label-text">Full Name</span>
-        </label>
-        <input
-          type="text"
-          placeholder="Enter your full name"
-          className="input input-bordered"
-          name="name"
-          value={formData.name}
-          onChange={handleChange}
-          required
-        />
-      </div>
+    <form noValidate onSubmit={handleSubmit} className="space-y-4">
+      <FormInput
+        label="Full Name"
+        type="text"
+        placeholder="Enter your full name"
+        value={formData.name}
+        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+        required
+      />
 
-      <div className="form-control">
-        <label className="label">
-          <span className="label-text">Email</span>
-        </label>
-        <input
-          type="email"
-          placeholder="Enter your email"
-          className="input input-bordered"
-          name="email"
-          value={formData.email}
-          onChange={handleChange}
-          required
-        />
-      </div>
+      <FormInput
+        label="Email"
+        type="email"
+        placeholder="Enter your email"
+        value={formData.email}
+        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+        required
+      />
 
-      <div className="form-control">
-        <label className="label">
-          <span className="label-text">Password</span>
-        </label>
-        <input
-          type="password"
-          placeholder="Enter a password"
-          className="input input-bordered"
-          name="password"
-          value={formData.password}
-          onChange={handleChange}
-          required
-        />
-      </div>
+      <FormInput
+        label="Password"
+        type="password"
+        placeholder="Enter password"
+        value={formData.password}
+        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+        required
+      />
 
-      <div className="form-control">
-        <label className="label">
-          <span className="label-text">Confirm Password</span>
-        </label>
-        <input
-          type="password"
-          placeholder="Confirm your password"
-          className="input input-bordered"
-          name="confirmPassword"
-          value={formData.confirmPassword}
-          onChange={handleChange}
-          required
-        />
-      </div>
-
+      <FormInput
+        label="Confirm Password"
+        type="password"
+        placeholder="Enter confirm password"
+        value={formData.confirmPassword}
+        onChange={(e) =>
+          setFormData({ ...formData, confirmPassword: e.target.value })
+        }
+        required
+      />
       {error && (
         <div className="alert alert-error">
           <svg
@@ -125,17 +104,11 @@ export default function SignupPage() {
           <span>{error}</span>
         </div>
       )}
-
-      <button
-        type="submit"
-        className="btn btn-primary w-full"
-        disabled={signupMutation.isPending}
-      >
-        {signupMutation.isPending ? 'Creating account...' : 'Create Account'}
-      </button>
-
+      <PrimaryButton type="submit" loading={signupMutation.isPending}>
+        Create Account
+      </PrimaryButton>
       <p className="text-center text-sm">
-        Already have an account?{' '}
+        Already have an account?{" "}
         <Link to="/auth/login" className="link link-primary">
           Sign in
         </Link>
