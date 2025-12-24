@@ -264,7 +264,7 @@ export default function SubjectsPage() {
 
           <div className="rounded-2xl bg-primary/35 p-5 max-h-[60vh] overflow-y-auto">
             <p className="whitespace-pre-wrap text-sm leading-relaxed">
-              {detailsSubject?.description}
+              {detailsSubject?.description || "No description provided"}
             </p>
           </div>
 

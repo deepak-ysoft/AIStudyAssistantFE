@@ -9,5 +9,4 @@ export const notesApi = {
   uploadFile: (formData) => axiosInstance.post('/notes/upload', formData, {
     headers: { 'Content-Type': 'multipart/form-data' }
   }),
-  generateSummary: (id) => axiosInstance.post(`/notes/${id}/summarize`),
 };

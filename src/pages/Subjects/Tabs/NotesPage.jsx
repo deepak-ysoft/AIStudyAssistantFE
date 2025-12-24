@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { MdNotes } from "react-icons/md";
 import { notesApi } from "../../../api/notesApi";
-import { flashcardApi } from "../../../api/flashcardApi";
+import { aiApi } from "../../../api/aiApi";
 import ConfirmDeleteModal from "../../../components/ConfirmDeleteModal";
 import AppModal from "../../../components/AppModal";
 import FormInput from "../../../components/FormInput";
@@ -10,13 +10,14 @@ import { PrimaryButton } from "../../../components/PrimaryButton";
 import { FiEdit2, FiTrash2, FiEye } from "react-icons/fi";
 import { HiOutlineSparkles } from "react-icons/hi2";
 import { TbCards } from "react-icons/tb";
+import { MdOutlineQuiz } from "react-icons/md";
 import PageHeader from "../../../components/PageHeader";
+import { MdOutlineSummarize } from "react-icons/md";
 
 export default function SubjectNotesPage({ subjectId }) {
   const [showModal, setShowModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [detailsNote, setDetailsNote] = useState(null);
-
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedNote, setSelectedNote] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -67,17 +68,29 @@ export default function SubjectNotesPage({ subjectId }) {
   });
 
   const summarizeMutation = useMutation({
-    mutationFn: notesApi.generateSummary,
-    onSuccess: (res) => {
-      alert("Summary generated successfully");
-      refetch();
+    mutationFn: aiApi.generateSummary,
+    onSuccess: (res, noteId) => {
+      const updatedNote = res?.data?.data;
+
+      if (updatedNote) {
+        openDetailsModal(updatedNote); // ✅ fresh data
+      }
+
+      refetch(); // keep list in sync
     },
   });
 
   const flashcardMutation = useMutation({
-    mutationFn: flashcardApi.generateFlashcards,
+    mutationFn: aiApi.generateFlashcards,
     onSuccess: () => {
       alert("Flashcards generated successfully");
+    },
+  });
+
+  const generateMCQsMutation = useMutation({
+    mutationFn: aiApi.generateMCQs,
+    onSuccess: () => {
+      alert("MCQs generated successfully");
     },
   });
 
@@ -208,21 +221,51 @@ export default function SubjectNotesPage({ subjectId }) {
 
                   {/* Action bar */}
                   <div className="mt-6 flex gap-2">
-                    <button
-                      className="btn btn-sm rounded-full bg-primary/10 text-primary hover:bg-primary/20"
-                      onClick={() => summarizeMutation.mutate(note._id)}
-                    >
-                      <HiOutlineSparkles size={16} />
-                      <span className="hidden lg:inline"> Summarize</span>
-                    </button>
+                    {!note.summary && (
+                      <div className="tooltip" data-tip="Generate Summary">
+                        <PrimaryButton
+                          className="btn btn-sm rounded-full bg-primary/10 text-primary hover:bg-primary/20"
+                          onClick={() => summarizeMutation.mutate(note._id)}
+                          disabled={summarizeMutation.isPending}
+                          title="Summarize"
+                        >
+                          <HiOutlineSparkles size={16} />
+                          <span className="hidden xl:inline"> Summarize</span>
+                        </PrimaryButton>
+                      </div>
+                    )}
 
-                    <button
-                      className="btn btn-sm rounded-full bg-secondary/10 text-secondary hover:bg-secondary/20"
-                      onClick={() => flashcardMutation.mutate(note._id)}
-                    >
-                      <TbCards size={16} />
-                      <span className="hidden lg:inline"> Flashcards</span>
-                    </button>
+                    <div className="tooltip" data-tip="Already Summarized">
+                      {note.summary && (
+                        <span
+                          className="btn btn-sm rounded-full bg-primary/10 text-primary hover:bg-primary/20"
+                          title="Summarized"
+                        >
+                          <MdOutlineSummarize size={16} />
+                          <span className="hidden xl:inline"> Summarized</span>
+                        </span>
+                      )}
+                    </div>
+                    <div className="tooltip" data-tip="Generate MCQs">
+                      <PrimaryButton
+                        className="btn btn-sm rounded-full bg-info/10 text-info hover:bg-info/20"
+                        onClick={() => generateMCQsMutation.mutate(note._id)}
+                      >
+                        <MdOutlineQuiz size={16} />
+                        <span className="hidden xl:inline">MCQs</span>
+                      </PrimaryButton>
+                    </div>
+
+                    <div className="tooltip" data-tip="Generate Flashcards">
+                      <PrimaryButton
+                        className="btn btn-sm rounded-full bg-secondary/10 text-secondary hover:bg-secondary/20"
+                        onClick={() => flashcardMutation.mutate(note._id)}
+                        title="Flashcards"
+                      >
+                        <TbCards size={16} />
+                        <span className="hidden xl:inline"> Flashcards</span>
+                      </PrimaryButton>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -278,7 +321,7 @@ export default function SubjectNotesPage({ subjectId }) {
           />
 
           <div className="flex justify-end gap-2 pt-4">
-            <button type="button" className="btn " onClick={closeModal}>
+            <button type="button" className="btn" onClick={closeModal}>
               Cancel
             </button>
             <PrimaryButton
@@ -296,24 +339,40 @@ export default function SubjectNotesPage({ subjectId }) {
         title="Note Details"
         onClose={closeDetailsModal}
       >
-        <div className="space-y-4">
-          <div>
-            <h2 className="text-2xl font-semibold">{detailsNote?.title}</h2>
-          </div>
+        <div className="space-y-6">
+          {/* Title */}
+          <h2 className="text-2xl font-semibold">{detailsNote?.title}</h2>
 
-          <div className="rounded-2xl bg-primary/35 p-5 max-h-[60vh] overflow-y-auto">
+          {/* Summary (if available) */}
+          {detailsNote?.summary && (
+            <div className="rounded-2xl bg-secondary/10 p-5 border border-secondary/20">
+              <h3 className="mb-2 text-sm font-semibold text-secondary">
+                Summary
+              </h3>
+              <p className="whitespace-pre-wrap text-sm leading-relaxed">
+                {detailsNote.summary}
+              </p>
+            </div>
+          )}
+
+          {/* Content */}
+          <div className="rounded-2xl bg-primary/10 p-5 max-h-[60vh] overflow-y-auto">
+            <h3 className="mb-2 text-sm font-semibold text-primary">
+              Full Content
+            </h3>
             <p className="whitespace-pre-wrap text-sm leading-relaxed">
               {detailsNote?.content}
             </p>
           </div>
 
           <div className="flex justify-end pt-2">
-            <button className="btn " onClick={closeDetailsModal}>
+            <button className="btn" onClick={closeDetailsModal}>
               Close
             </button>
           </div>
         </div>
       </AppModal>
+
       {/* DELETE CONFIRM MODAL */}
       <ConfirmDeleteModal
         open={showDeleteModal}

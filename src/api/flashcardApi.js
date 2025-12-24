@@ -12,6 +12,4 @@ export const flashcardApi = {
 
   getBySubject: (subjectId) =>
     axiosInstance.get(`/flashcards/subject/${subjectId}`),
-  generateFlashcards: (id) =>
-    axiosInstance.post(`/flashcards/${id}/flashcards`),
 };
