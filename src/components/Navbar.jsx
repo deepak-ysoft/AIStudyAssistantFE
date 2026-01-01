@@ -42,7 +42,7 @@ export default function Navbar() {
           <MdMenu className="text-xl" />
         </label>
 
-        <span className="ml-4 text-sm text-base-content/80 truncate max-w-[180px]">
+        <span className="ml-4 text-md text-base-content/80 truncate max-w-[180px]">
           Hi,{" "}
           <span className="font-semibold text-base-content">
             {user?.name?.split(" ")[0]}

@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { aiApi } from "../../api/aiApi";
 import { MdCalendarToday } from "react-icons/md";
@@ -7,6 +6,9 @@ import FormInput from "../../components/FormInput";
 import { FiCalendar } from "react-icons/fi";
 import PageHeader from "../../components/PageHeader";
 import jsPDF from "jspdf";
+import { useState, useEffect } from "react";
+import { FiPrinter, FiDownload, FiTrash2, FiFileText } from "react-icons/fi";
+import { HiOutlineDocumentDownload } from "react-icons/hi";
 
 export default function StudyPlannerPage() {
   const [formData, setFormData] = useState({
@@ -15,6 +17,19 @@ export default function StudyPlannerPage() {
   });
   const [plan, setPlan] = useState(null);
 
+  useEffect(() => {
+    const savedPlan = localStorage.getItem("weekly-study-plan");
+    if (savedPlan) setPlan(savedPlan);
+  }, []);
+
+  useEffect(() => {
+    if (plan) localStorage.setItem("weekly-study-plan", plan);
+  }, [plan]);
+
+  const clearPlan = () => {
+    localStorage.removeItem("weekly-study-plan");
+    setPlan(null);
+  };
   const generatePlanMutation = useMutation({
     mutationFn: (data) =>
       aiApi.generateStudyPlan(data.availableHours, data.subjects),
@@ -74,17 +89,27 @@ export default function StudyPlannerPage() {
 
   const handleDownloadPdf = () => {
     const doc = new jsPDF();
+    const pageHeight = doc.internal.pageSize.height;
+    const marginLeft = 15;
+    const marginTop = 20;
+    const lineHeight = 7;
 
     doc.setFont("helvetica");
     doc.setFontSize(12);
 
-    const marginLeft = 15;
-    const marginTop = 20;
+    doc.text("", marginLeft, 15);
 
-    doc.text("Weekly Study Plan", marginLeft, 15);
+    const lines = doc.splitTextToSize(plan, 180); // wrap text within page width
+    let y = marginTop;
 
-    const lines = doc.splitTextToSize(plan, 180);
-    doc.text(lines, marginLeft, marginTop);
+    for (let i = 0; i < lines.length; i++) {
+      if (y + lineHeight > pageHeight - 20) {
+        doc.addPage();
+        y = marginTop;
+      }
+      doc.text(lines[i], marginLeft, y);
+      y += lineHeight;
+    }
 
     doc.save("weekly-study-plan.pdf");
   };
@@ -174,45 +199,57 @@ export default function StudyPlannerPage() {
             {plan ? (
               <div className="card bg-primary/35 shadow-lg rounded-3xl overflow-hidden">
                 {/* Header */}
-                <div className="bg-gradient-to-r from-primary/10 to-secondary/10 px-6 py-4 border-b border-base-300">
-                  <h2 className="text-lg font-semibold">
-                    Your Weekly Schedule
-                  </h2>
-                  <p className="text-sm text-base-content/70">
-                    AI-generated study plan tailored for you
-                  </p>
+                <div className="bg-gradient-to-r from-primary/10 to-secondary/10 px-6 py-4 border-b border-base-300 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <div>
+                    <h2 className="text-lg font-semibold">
+                      Your Weekly Schedule
+                    </h2>
+                    <p className="text-sm text-base-content/70">
+                      AI-generated study plan tailored for you
+                    </p>
+                  </div>
+                  <div className="mt-2 flex gap-2">
+                    <PrimaryButton
+                      onClick={handlePrint}
+                      className="btn btn-sm btn-soft btn-primary"
+                    >
+                      <FiPrinter className="text-base" />
+                      Print
+                    </PrimaryButton>
+
+                    <PrimaryButton
+                      onClick={handleDownloadTxt}
+                      className="btn btn-sm btn-soft btn-primary"
+                    >
+                      <FiFileText className="text-base" />
+                      TXT
+                    </PrimaryButton>
+
+                    <PrimaryButton
+                      onClick={handleDownloadPdf}
+                      className="btn btn-sm btn-soft btn-primary"
+                    >
+                      <HiOutlineDocumentDownload className="text-base" />
+                      PDF
+                    </PrimaryButton>
+                  </div>
                 </div>
 
-                <div className="card-body space-y-4">
-                  <div className="bg-base-100 rounded-2xl p-4 max-h-96 overflow-auto text-sm leading-relaxed">
-                    <pre className="whitespace-pre-wrap">
-                      <pre className="whitespace-pre-wrap">{plan}</pre>
-                    </pre>
+                <div className="card-body space-y-4 relative">
+                  {/* Floating Clear Button */}
+                  <div className="absolute top-2 right-5 z-10">
+                    <PrimaryButton
+                      onClick={clearPlan}
+                      className="btn btn-sm btn-soft btn-accent tooltip tooltip-left"
+                      data-tip="Clear plan"
+                    >
+                      <FiTrash2 className="text-lg" />
+                    </PrimaryButton>
                   </div>
 
-                  <div className="flex justify-end">
-                    <div className="flex gap-3 justify-end mt-4">
-                      <button
-                        onClick={handlePrint}
-                        className="btn btn-outline btn-primary rounded-full"
-                      >
-                        Print
-                      </button>
-
-                      <button
-                        onClick={handleDownloadTxt}
-                        className="btn btn-outline btn-secondary rounded-full"
-                      >
-                        Download TXT
-                      </button>
-
-                      <button
-                        onClick={handleDownloadPdf}
-                        className="btn btn-outline btn-accent rounded-full"
-                      >
-                        Download PDF
-                      </button>
-                    </div>
+                  {/* Content */}
+                  <div className="bg-base-100 rounded-2xl p-4 max-h-96 overflow-auto text-sm leading-relaxed">
+                    <pre className="whitespace-pre-wrap">{plan}</pre>
                   </div>
                 </div>
               </div>

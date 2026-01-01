@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { MdQuiz } from "react-icons/md";
 import { FiEdit2, FiTrash2, FiPlay } from "react-icons/fi";
@@ -8,12 +8,21 @@ import AppModal from "../../../components/AppModal";
 import FormInput from "../../../components/FormInput";
 import { PrimaryButton } from "../../../components/PrimaryButton";
 import PageHeader from "../../../components/PageHeader";
+import { FiCheckCircle, FiXCircle } from "react-icons/fi";
+import { RiTimerFill } from "react-icons/ri";
 
 export default function SubjectQuizzesPage({ subjectId }) {
   const [showModal, setShowModal] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedQuiz, setSelectedQuiz] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [quizModalOpen, setQuizModalOpen] = useState(false);
+  const [activeQuiz, setActiveQuiz] = useState(null);
+  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [answers, setAnswers] = useState([]);
+  const [timeLeft, setTimeLeft] = useState(0);
+  const [showResult, setShowResult] = useState(false);
+  const [quizEndedByTimeout, setQuizEndedByTimeout] = useState(false);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -21,6 +30,22 @@ export default function SubjectQuizzesPage({ subjectId }) {
     subject: subjectId,
     questions: [],
   });
+
+  useEffect(() => {
+    if (!quizModalOpen || showResult) return;
+
+    if (timeLeft <= 0) {
+      setQuizEndedByTimeout(true);
+      finishQuiz();
+      return;
+    }
+
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => prev - 1);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [quizModalOpen, timeLeft, showResult]);
 
   /* ------------------ QUERY ------------------ */
 
@@ -34,7 +59,6 @@ export default function SubjectQuizzesPage({ subjectId }) {
     select: (res) => res.data?.data || [],
     enabled: !!subjectId,
   });
-
   /* ------------------ QUESTION HELPERS ------------------ */
 
   const addQuestion = () => {
@@ -50,6 +74,64 @@ export default function SubjectQuizzesPage({ subjectId }) {
         },
       ],
     }));
+  };
+
+  const score = activeQuiz
+    ? activeQuiz.questions.reduce((acc, q, i) => {
+        return acc + (answers[i] === q.correctAnswer ? 1 : 0);
+      }, 0)
+    : 0;
+
+  const isCorrect = (qIndex, optionIndex) => {
+    return (
+      answers[qIndex] !== undefined &&
+      optionIndex === activeQuiz.questions[qIndex].correctAnswer
+    );
+  };
+
+  const isWrong = (qIndex, optionIndex) => {
+    return (
+      answers[qIndex] === optionIndex &&
+      optionIndex !== activeQuiz.questions[qIndex].correctAnswer
+    );
+  };
+
+  const formatTime = (sec) => {
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return `${m}:${s.toString().padStart(2, "0")}`;
+  };
+
+  const selectAnswer = (idx) => {
+    const updated = [...answers];
+    updated[currentQuestion] = idx;
+    setAnswers(updated);
+  };
+
+  const nextQuestion = () => {
+    if (currentQuestion + 1 < activeQuiz.questions.length) {
+      setCurrentQuestion((q) => q + 1);
+    } else {
+      finishQuiz();
+    }
+  };
+
+  const finishQuiz = () => {
+    console.log("Finishing quiz");
+    setShowResult(true);
+  };
+
+  const startQuiz = (quiz) => {
+    setActiveQuiz(quiz);
+    setCurrentQuestion(0);
+    setAnswers([]);
+    setShowResult(false);
+    setQuizEndedByTimeout(false);
+
+    const seconds = quiz.duration ? quiz.duration * 60 : 0;
+    setTimeLeft(seconds);
+
+    setQuizModalOpen(true);
   };
 
   const updateQuestion = (index, field, value) => {
@@ -184,7 +266,7 @@ export default function SubjectQuizzesPage({ subjectId }) {
                     <div className="order-1 xl:order-2  flex  gap-3">
                       <button
                         className="btn btn-circle btn-sm bg-primary/35 hover:bg-base-300"
-                        onClick={() => startQuizMutation.mutate(quiz._id)}
+                        onClick={() => startQuiz(quiz)}
                       >
                         <FiPlay className="text-success" size={16} />
                       </button>
@@ -245,6 +327,195 @@ export default function SubjectQuizzesPage({ subjectId }) {
         )}
       </div>
 
+      {/* Start Quiz Modal */}
+      <AppModal
+        open={quizModalOpen}
+        title={activeQuiz?.title || "Quiz"}
+        onClose={() => {
+          setQuizModalOpen(false);
+          setActiveQuiz(null);
+          setShowResult(false);
+        }}
+      >
+        {activeQuiz && !showResult && (
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <p className="font-medium">
+                Question {currentQuestion + 1} / {activeQuiz.questions.length}
+              </p>
+              {activeQuiz.duration && (
+                <span className="font-mono text-error flex gap-3 items-center">
+                  <RiTimerFill className="w-7 h-7" /> {formatTime(timeLeft)}
+                </span>
+              )}
+            </div>
+
+            <p className="text-lg font-semibold">
+              {activeQuiz.questions[currentQuestion].question}
+            </p>
+
+            <div className="space-y-2">
+              {activeQuiz.questions[currentQuestion].options.map((opt, idx) => {
+                const answered = answers[currentQuestion] !== undefined;
+
+                let btnClass = "btn-outline";
+
+                if (answered) {
+                  if (isCorrect(currentQuestion, idx)) {
+                    btnClass = "btn-success";
+                  } else if (isWrong(currentQuestion, idx)) {
+                    btnClass = "btn-error";
+                  }
+                }
+
+                return (
+                  <button
+                    key={idx}
+                    onClick={() => selectAnswer(idx)}
+                    className={`
+    w-full text-left rounded-xl px-4 py-3 text-sm transition-all
+    border
+    ${answered ? "pointer-events-none" : "hover:bg-base-200"}
+    ${
+      isCorrect(currentQuestion, idx)
+        ? "border-success bg-success/10 text-success"
+        : isWrong(currentQuestion, idx)
+        ? "border-error bg-error/10 text-error"
+        : "border-base-300 bg-base-100 text-base-content"
+    }
+  `}
+                  >
+                    {opt}
+                  </button>
+                );
+              })}
+            </div>
+            {answers[currentQuestion] !== undefined && (
+              <div
+                className={`mt-3 flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium
+      ${
+        answers[currentQuestion] ===
+        activeQuiz.questions[currentQuestion].correctAnswer
+          ? "bg-success/10 text-success"
+          : "bg-error/10 text-error"
+      }
+    `}
+              >
+                {answers[currentQuestion] ===
+                activeQuiz.questions[currentQuestion].correctAnswer ? (
+                  <>
+                    <FiCheckCircle className="text-lg" />
+                    <span>Correct answer</span>
+                  </>
+                ) : (
+                  <>
+                    <FiXCircle className="text-lg" />
+                    <span>Wrong answer</span>
+                  </>
+                )}
+              </div>
+            )}
+
+            <div className="flex justify-end pt-4">
+              <PrimaryButton
+                onClick={nextQuestion}
+                disabled={answers[currentQuestion] === undefined}
+              >
+                {currentQuestion + 1 === activeQuiz.questions.length
+                  ? "Finish Quiz"
+                  : "Next"}
+              </PrimaryButton>
+            </div>
+          </div>
+        )}
+        {activeQuiz && showResult && (
+          <div className="space-y-6">
+            <div className="text-center">
+              <h2 className="text-2xl font-bold">Quiz Result</h2>
+
+              <p className="text-lg mt-2">
+                Score:{" "}
+                <span className="font-semibold text-success">
+                  {score} / {activeQuiz.questions.length}
+                </span>
+              </p>
+
+              <p className="mt-1">
+                Status:{" "}
+                {score >= activeQuiz.passingMarks ? (
+                  <span className="text-success font-semibold">Passed</span>
+                ) : (
+                  <span className="text-error font-semibold">Failed</span>
+                )}
+              </p>
+
+              <p className="text-sm text-base-content/70 mt-1">
+                Attempted {answers.filter((a) => a !== undefined).length} /{" "}
+                {activeQuiz.questions.length} questions
+              </p>
+            </div>
+
+            {quizEndedByTimeout && (
+              <div className="mb-4 flex items-center justify-center gap-2 rounded-xl bg-warning/15 px-4 py-2 text-warning font-medium">
+                <RiTimerFill className="text-lg" />
+                <span>Time’s up! Quiz auto-submitted</span>
+              </div>
+            )}
+            {/* Question Review */}
+            <div className="space-y-4">
+              {activeQuiz.questions.map((q, qIndex) => {
+                const userAnswer = answers[qIndex];
+
+                if (userAnswer === undefined) return null; // 👈 skip unattempted
+
+                return (
+                  <div
+                    key={qIndex}
+                    className="border rounded-2xl p-4 space-y-2"
+                  >
+                    <p className="font-medium">
+                      Q{qIndex + 1}. {q.question}
+                    </p>
+
+                    {q.options.map((opt, oIndex) => (
+                      <div
+                        key={oIndex}
+                        className={`p-2 rounded-lg
+            ${
+              oIndex === q.correctAnswer
+                ? "bg-success/20 text-success"
+                : userAnswer === oIndex
+                ? "bg-error/20 text-error"
+                : "bg-base-200"
+            }
+          `}
+                      >
+                        {opt}
+                      </div>
+                    ))}
+
+                    {q.explanation && (
+                      <p className="text-sm text-base-content/70">
+                        💡 {q.explanation}
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="text-center">
+              <button
+                className="btn btn-primary"
+                onClick={() => setQuizModalOpen(false)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
+      </AppModal>
+
       {/* CREATE / EDIT MODAL */}
       <AppModal
         open={showModal}
@@ -277,7 +548,7 @@ export default function SubjectQuizzesPage({ subjectId }) {
               <h4 className="text-lg font-semibold">Questions</h4>
               <button
                 type="button"
-                className="btn btn-sm btn-outline"
+                className="btn btn-sm btn-primary btn-outline"
                 onClick={addQuestion}
               >
                 + Add Question
@@ -290,7 +561,7 @@ export default function SubjectQuizzesPage({ subjectId }) {
                   <h5 className="font-medium">Question {qIndex + 1}</h5>
                   <button
                     type="button"
-                    className="btn btn-xs btn-error"
+                    className="btn btn-xs btn-accent btn-outline"
                     onClick={() => removeQuestion(qIndex)}
                   >
                     Remove

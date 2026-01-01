@@ -38,7 +38,6 @@ export default function SubjectFlashcardsPage({ subjectId }) {
   });
 
   const currentCard = flashcards[currentIndex];
-
   /* ---------------- MUTATIONS ---------------- */
 
   const createMutation = useMutation({
@@ -168,6 +167,7 @@ export default function SubjectFlashcardsPage({ subjectId }) {
                   <p className="text-2xl font-semibold">
                     {isFlipped ? currentCard.answer : currentCard.question}
                   </p>
+
                   <p className="mt-6 text-xs opacity-60">Tap to flip</p>
                 </div>
               </div>
@@ -200,6 +200,9 @@ export default function SubjectFlashcardsPage({ subjectId }) {
                 className="btn bg-primary/50 hover:bg-primary/70"
                 onClick={() => handleMarkLearned(true)}
               >
+                {currentCard.correctCount > 0 ? (
+                  <p>{currentCard.correctCount}</p>
+                ) : null}{" "}
                 Mark as Learned
               </PrimaryButton>
 
@@ -207,6 +210,9 @@ export default function SubjectFlashcardsPage({ subjectId }) {
                 className="btn bg-secondary/50  hover:bg-secondary/70"
                 onClick={() => handleMarkLearned(false)}
               >
+                {currentCard.wrongCount > 0 ? (
+                  <p>{currentCard.wrongCount}</p>
+                ) : null}{" "}
                 Wrong
               </PrimaryButton>
             </div>
@@ -216,7 +222,6 @@ export default function SubjectFlashcardsPage({ subjectId }) {
               <PrimaryButton
                 onClick={handlePrevious}
                 disabled={currentIndex === 0}
-                className="btn btn-outline "
               >
                 ← Previous
               </PrimaryButton>
@@ -224,7 +229,6 @@ export default function SubjectFlashcardsPage({ subjectId }) {
               <PrimaryButton
                 onClick={handleNext}
                 disabled={currentIndex === flashcards.length - 1}
-                className="btn btn-outline "
               >
                 Next →
               </PrimaryButton>

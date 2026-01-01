@@ -21,6 +21,8 @@ export default function SubjectNotesPage({ subjectId }) {
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedNote, setSelectedNote] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorsMessage] = useState("");
   const [formData, setFormData] = useState({
     title: "",
     content: "",
@@ -83,14 +85,14 @@ export default function SubjectNotesPage({ subjectId }) {
   const flashcardMutation = useMutation({
     mutationFn: aiApi.generateFlashcards,
     onSuccess: () => {
-      alert("Flashcards generated successfully");
+      setErrorsMessage("Flashcards generated successfully");
     },
   });
 
   const generateMCQsMutation = useMutation({
     mutationFn: aiApi.generateMCQs,
     onSuccess: () => {
-      alert("MCQs generated successfully");
+      setSuccessMessage("MCQs generated successfully");
     },
   });
 
@@ -146,6 +148,21 @@ export default function SubjectNotesPage({ subjectId }) {
 
   return (
     <div>
+      {successMessage ||
+        (errorMessage && (
+          <div class="toast toast-top toast-end z-50">
+            {successMessage && (
+              <div class="alert alert-info">
+                <span>{successMessage}</span>
+              </div>
+            )}
+            {errorMessage && (
+              <div class="alert alert-error">
+                <span>{errorMessage}</span>
+              </div>
+            )}
+          </div>
+        ))}
       {/* HEADER */}
       <PageHeader
         icon={MdNotes}
