@@ -5,8 +5,10 @@ import { authApi } from "../../api/authApi";
 import { useAuth } from "../../context/AuthContext";
 import FormInput from "../../components/FormInput";
 import { PrimaryButton } from "../../components/PrimaryButton";
+import { useToast } from "../../components/ToastContext";
 
 export default function SignupPage() {
+  const { showToast } = useToast();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -20,19 +22,18 @@ export default function SignupPage() {
   const signupMutation = useMutation({
     mutationFn: (data) => authApi.signup(data),
     onSuccess: (response) => {
+      showToast(
+        response.data.message,
+        response.data.success ? "success" : "error"
+      );
       const { user, token } = response.data.data;
       login(user, token);
       navigate("/dashboard");
     },
-    onError: (err) => {
-      setError(err.response?.data?.message || "Signup failed");
+    onError: (response) => {
+      showToast(response.data.message, "error");
     },
   });
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
 
   const handleSubmit = (e) => {
     e.preventDefault();

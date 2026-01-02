@@ -8,10 +8,12 @@ import AppModal from "../../components/AppModal";
 import { authApi } from "../../api/authApi";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "../../components/ToastContext";
 
 export default function SettingsPage() {
   const { logout } = useAuth();
   const navigate = useNavigate();
+    const { showToast } = useToast();
 
   /* ---------------- CHANGE PASSWORD ---------------- */
 
@@ -27,12 +29,15 @@ export default function SettingsPage() {
         currentPassword: password.current,
         newPassword: password.new,
       }),
-    onSuccess: () => {
+    onSuccess: (response) => {
       setPassword({ current: "", new: "", confirm: "" });
-      alert("Password changed successfully");
+      showToast(
+        response.data.message,
+        response.data.success ? "success" : "error"
+      );
     },
-    onError: (err) => {
-      alert(err.response?.data?.message || "Failed to change password");
+    onError: (response) => {
+      showToast(response.data.message, "error");
     },
   });
 
@@ -56,12 +61,15 @@ export default function SettingsPage() {
 
   const changeEmailMutation = useMutation({
     mutationFn: () => authApi.changeEmail(newEmail),
-    onSuccess: () => {
-      alert("Verification email sent to new email address");
+    onSuccess: (response) => {
       setNewEmail("");
+      showToast(
+        response.data.message,
+        response.data.success ? "success" : "error"
+      );
     },
-    onError: (err) => {
-      alert(err.response?.data?.message || "Failed to send verification email");
+    onError: (response) => {
+      showToast(response.data.message, "error");
     },
   });
 
@@ -71,12 +79,16 @@ export default function SettingsPage() {
   const [deletePassword, setDeletePassword] = useState("");
   const deleteAccountMutation = useMutation({
     mutationFn: () => authApi.deleteAccount({ password: deletePassword }),
-    onSuccess: () => {
+    onSuccess: (response) => {
       logout();
       navigate("/auth/login");
+      showToast(
+        response.data.message,
+        response.data.success ? "success" : "error"
+      );
     },
-    onError: (err) => {
-      alert(err.response?.data?.message || "Failed to delete account");
+    onError: (response) => {
+      showToast(response.data.message, "error");
     },
   });
 

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { subjectsApi } from "../../api/subjectsApi";
 import { MdBook } from "react-icons/md";
@@ -9,6 +9,7 @@ import { PrimaryButton } from "../../components/PrimaryButton";
 import AppModal from "../../components/AppModal";
 import FormInput from "../../components/FormInput";
 import PageHeader from "../../components/PageHeader";
+import { useToast } from "../../components/ToastContext";
 
 export default function SubjectsPage() {
   const [showModal, setShowModal] = useState(false);
@@ -19,6 +20,7 @@ export default function SubjectsPage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const navigate = useNavigate();
 
+  const { showToast } = useToast();
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -34,32 +36,57 @@ export default function SubjectsPage() {
     queryKey: ["subjects"],
     queryFn: subjectsApi.getAll,
     select: (res) => res.data?.data || [],
+    // 👇 IMPORTANT
+    staleTime: 0, // always stale
+    refetchOnMount: "always", // refetch when page opens
+    refetchOnWindowFocus: true, // refetch when user comes back to tab
   });
 
   /* ---------------- MUTATIONS ---------------- */
 
   const createMutation = useMutation({
     mutationFn: subjectsApi.create,
-    onSuccess: () => {
+    onSuccess: (response) => {
       closeModal();
       refetch();
+      showToast(
+        response.data.message,
+        response.data.success ? "success" : "error"
+      );
+    },
+    onError: (response) => {
+      showToast(response.data.message, "error");
     },
   });
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => subjectsApi.update(id, data),
-    onSuccess: () => {
+    onSuccess: (response) => {
       closeModal();
       refetch();
+      showToast(
+        response.data.message,
+        response.data.success ? "success" : "error"
+      );
+    },
+    onError: (response) => {
+      showToast(response.data.message, "error");
     },
   });
 
   const deleteMutation = useMutation({
     mutationFn: subjectsApi.delete,
-    onSuccess: () => {
+    onSuccess: (response) => {
       setShowDeleteModal(false);
       setSelectedSubject(null);
       refetch();
+      showToast(
+        response.data.message,
+        response.data.success ? "success" : "error"
+      );
+    },
+    onError: (response) => {
+      showToast(response.data.message, "error");
     },
   });
 

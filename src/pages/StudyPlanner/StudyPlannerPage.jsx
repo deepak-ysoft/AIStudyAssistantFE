@@ -9,8 +9,10 @@ import jsPDF from "jspdf";
 import { useState, useEffect } from "react";
 import { FiPrinter, FiDownload, FiTrash2, FiFileText } from "react-icons/fi";
 import { HiOutlineDocumentDownload } from "react-icons/hi";
+import { useToast } from "../../components/ToastContext";
 
 export default function StudyPlannerPage() {
+  const { showToast } = useToast();
   const [formData, setFormData] = useState({
     availableHours: "",
     subjects: [],
@@ -35,6 +37,13 @@ export default function StudyPlannerPage() {
       aiApi.generateStudyPlan(data.availableHours, data.subjects),
     onSuccess: (response) => {
       setPlan(response.data?.data?.plan);
+      showToast(
+        response.data.message,
+        response.data.success ? "success" : "error"
+      );
+    },
+    onError: (response) => {
+      showToast(response.data.message, "error");
     },
   });
 

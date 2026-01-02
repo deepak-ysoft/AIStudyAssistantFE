@@ -5,6 +5,7 @@ import { MdDarkMode, MdLightMode, MdMenu } from "react-icons/md";
 import { useEffect, useRef, useState } from "react";
 import ConfirmLogoutModal from "./ConfirmLogoutModal";
 import { MdPerson, MdSettings, MdLogout } from "react-icons/md";
+import { PrimaryButton } from "./PrimaryButton";
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -52,17 +53,15 @@ export default function Navbar() {
         {/* Right Actions */}
         <div className="flex items-center gap-4 ml-auto">
           {/* Theme Toggle */}
-          <button
-            onClick={toggleTheme}
-            className="btn btn-circle"
-            title={`Theme: ${theme}`}
-          >
-            {["dark", "dracula", "synthwave", "cyberpunk"].includes(theme) ? (
-              <MdLightMode className="text-xl" />
-            ) : (
-              <MdDarkMode className="text-xl" />
-            )}
-          </button>
+          <div className="tooltip tooltip-bottom" data-tip={theme}>
+            <PrimaryButton onClick={toggleTheme} className="btn btn-circle">
+              {["dark", "dracula", "synthwave", "cyberpunk"].includes(theme) ? (
+                <MdLightMode className="text-xl" />
+              ) : (
+                <MdDarkMode className="text-xl" />
+              )}
+            </PrimaryButton>
+          </div>
 
           {/* Avatar + Dropdown */}
           {user && (

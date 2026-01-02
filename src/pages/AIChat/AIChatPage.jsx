@@ -7,8 +7,10 @@ import FormInput from "../../components/FormInput";
 import { FiSend } from "react-icons/fi";
 import PageHeader from "../../components/PageHeader";
 import { HiDotsVertical } from "react-icons/hi";
+import { useToast } from "../../components/ToastContext";
 
 export default function AIChatPage() {
+  const { showToast } = useToast();
   const [messages, setMessages] = useState(() => {
     const saved = localStorage.getItem("ai-chat-messages");
     if (saved) {
@@ -31,6 +33,10 @@ export default function AIChatPage() {
   const chatMutation = useMutation({
     mutationFn: (payload) => aiApi.chat(payload),
     onSuccess: (response) => {
+      showToast(
+        response.data.message,
+        response.data.success ? "success" : "error"
+      );
       const aiMessage = response.data?.data?.response;
       if (aiMessage) {
         setMessages((prev) => [
@@ -38,6 +44,9 @@ export default function AIChatPage() {
           { id: Date.now(), text: aiMessage, sender: "ai" },
         ]);
       }
+    },
+    onError: (response) => {
+      showToast(response.data.message, "error");
     },
   });
 

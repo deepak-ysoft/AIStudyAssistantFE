@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { authApi } from "../../api/authApi";
 import FormInput from "../../components/FormInput";
+import { useToast } from "../../components/ToastContext";
 // import { authApi } from "../../api/authApi"; // enable when API is ready
 
 export default function RestoreAccountRequestPage() {
@@ -12,6 +13,7 @@ export default function RestoreAccountRequestPage() {
   const searchParams = new URLSearchParams(location.search);
   const email = searchParams.get("email");
 
+  const { showToast } = useToast();
   const [step, setStep] = useState("confirm"); // confirm | otp | success
   const [otp, setOtp] = useState("");
 
@@ -20,11 +22,15 @@ export default function RestoreAccountRequestPage() {
   const sendOtpMutation = useMutation({
     // send OTP
     mutationFn: () => authApi.sendRestoreOtp({ email }),
-    onSuccess: () => {
+    onSuccess: (response) => {
+      showToast(
+        response.data.message,
+        response.data.success ? "success" : "error"
+      );
       setStep("otp");
     },
-    onError: (err) => {
-      alert(err?.message || "Failed to send OTP");
+    onError: (response) => {
+      showToast(response.data.message, "error");
     },
   });
 
@@ -32,11 +38,15 @@ export default function RestoreAccountRequestPage() {
   const verifyOtpMutation = useMutation({
     // verify OTP
     mutationFn: () => authApi.verifyRestoreOtp({ email, otp }),
-    onSuccess: () => {
+    onSuccess: (response) => {
+      showToast(
+        response.data.message,
+        response.data.success ? "success" : "error"
+      );
       setStep("success");
     },
-    onError: (err) => {
-      alert(err?.message || "Invalid OTP");
+    onError: (response) => {
+      showToast(response.data.message, "error");
     },
   });
 

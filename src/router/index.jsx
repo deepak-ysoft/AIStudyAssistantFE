@@ -11,7 +11,6 @@ import ForgotPasswordPage from "../pages/Auth/ForgotPasswordPage";
 import ResetPasswordPage from "../pages/Auth/ResetPasswordPage";
 import EmailVerifiedPage from "../pages/Auth/EmailVerification";
 import RestoreAccountRequestPage from "../pages/Auth/RestoreDeletedAccount";
-
 import Dashboard from "../pages/Dashboard/Dashboard";
 import SubjectsPage from "../pages/Subjects/SubjectsPage";
 import SubjectDetailsPage from "../pages/Subjects/SubjectDetailsPage";
@@ -19,7 +18,6 @@ import SubjectNotesPage from "../pages/Subjects/Tabs/NotesPage";
 import AIChatPage from "../pages/AIChat/AIChatPage";
 import StudyPlannerPage from "../pages/StudyPlanner/StudyPlannerPage";
 import PomodoroPage from "../pages/Pomodoro/PomodoroPage";
-import ReportsPage from "../pages/Reports/ReportsPage";
 import ProfilePage from "../pages/Profile/ProfilePage";
 import SettingsPage from "../pages/Profile/SettingsPage";
 
@@ -70,7 +68,6 @@ export const router = createBrowserRouter([
       { path: "ai-chat", element: <AIChatPage /> },
       { path: "study-planner", element: <StudyPlannerPage /> },
       { path: "pomodoro", element: <PomodoroPage /> },
-      { path: "reports", element: <ReportsPage /> },
       { path: "profile", element: <ProfilePage /> },
       { path: "settings", element: <SettingsPage /> },
     ],

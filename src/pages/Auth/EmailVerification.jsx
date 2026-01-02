@@ -3,6 +3,7 @@ import { PrimaryButton } from "../../components/PrimaryButton";
 import { authApi } from "../../api/authApi";
 import { useEffect, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
+import { useToast } from "../../components/ToastContext";
 
 export default function EmailVerifiedPage() {
   const { token } = useParams(); // from path
@@ -11,6 +12,7 @@ export default function EmailVerifiedPage() {
   const searchParams = new URLSearchParams(location.search);
   const email = searchParams.get("email"); // from query
 
+  const { showToast } = useToast();
   const [statusMessage, setStatusMessage] = useState("Verifying your email...");
   const [isError, setIsError] = useState(false);
 
@@ -32,13 +34,14 @@ export default function EmailVerifiedPage() {
   // Resend verification email mutation
   const resendMutation = useMutation({
     mutationFn: () => authApi.resendVerificationEmail(email),
-    onSuccess: () => {
-      alert("Verification email sent successfully!");
-    },
-    onError: (err) => {
-      alert(
-        err.response?.data?.message || "Failed to resend verification email."
+    onSuccess: (response) => {
+      showToast(
+        response.data.message,
+        response.data.success ? "success" : "error"
       );
+    },
+    onError: (response) => {
+      showToast(response.data.message, "error");
     },
   });
 

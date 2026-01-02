@@ -8,6 +8,7 @@ import AppModal from "../../../components/AppModal";
 import FormInput from "../../../components/FormInput";
 import PageHeader from "../../../components/PageHeader";
 import ConfirmDeleteModal from "../../../components/ConfirmDeleteModal";
+import { useToast } from "../../../components/ToastContext";
 
 export default function SubjectFlashcardsPage({ subjectId }) {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -18,6 +19,7 @@ export default function SubjectFlashcardsPage({ subjectId }) {
   const [selectedCard, setSelectedCard] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
+  const { showToast } = useToast();
   const [formData, setFormData] = useState({
     question: "",
     answer: "",
@@ -35,6 +37,10 @@ export default function SubjectFlashcardsPage({ subjectId }) {
     queryFn: () => flashcardApi.getAll({ subject: subjectId }),
     select: (res) => res.data?.data || [],
     enabled: !!subjectId,
+    // 👇 IMPORTANT
+    staleTime: 0, // always stale
+    refetchOnMount: "always", // refetch when page opens
+    refetchOnWindowFocus: true, // refetch when user comes back to tab
   });
 
   const currentCard = flashcards[currentIndex];
@@ -42,34 +48,62 @@ export default function SubjectFlashcardsPage({ subjectId }) {
 
   const createMutation = useMutation({
     mutationFn: flashcardApi.create,
-    onSuccess: () => {
+    onSuccess: (response) => {
       closeModal();
       refetch();
+      showToast(
+        response.data.message,
+        response.data.success ? "success" : "error"
+      );
+    },
+    onError: (response) => {
+      showToast(response.data.message, "error");
     },
   });
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => flashcardApi.update(id, data),
-    onSuccess: () => {
+    onSuccess: (response) => {
       closeModal();
       refetch();
+      showToast(
+        response.data.message,
+        response.data.success ? "success" : "error"
+      );
+    },
+    onError: (response) => {
+      showToast(response.data.message, "error");
     },
   });
 
   const reviewMutation = useMutation({
     mutationFn: ({ id, isCorrect }) => flashcardApi.review(id, isCorrect),
-    onSuccess: () => {
+    onSuccess: (response) => {
       refetch();
       handleNext();
+      showToast(
+        response.data.message,
+        response.data.success ? "success" : "error"
+      );
+    },
+    onError: (response) => {
+      showToast(response.data.message, "error");
     },
   });
 
   const deleteMutation = useMutation({
     mutationFn: flashcardApi.delete,
-    onSuccess: () => {
+    onSuccess: (response) => {
       setShowDeleteModal(false);
       setSelectedCard(null);
       refetch();
+      showToast(
+        response.data.message,
+        response.data.success ? "success" : "error"
+      );
+    },
+    onError: (response) => {
+      showToast(response.data.message, "error");
     },
   });
 

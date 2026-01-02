@@ -1,5 +1,6 @@
 // src/context/AuthContext.jsx
 import { createContext, useContext, useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 
 const AuthContext = createContext(null);
 
@@ -7,6 +8,7 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
   const [initialized, setInitialized] = useState(false);
+  const queryClient = useQueryClient(); // <- add this
 
   const isAuthenticated = Boolean(token);
 
@@ -27,6 +29,9 @@ export function AuthProvider({ children }) {
     setToken(authToken);
     localStorage.setItem("token", authToken);
     localStorage.setItem("user", JSON.stringify(userData));
+
+    // Clear queries related to previous user
+    queryClient.clear(); // <-- clears all cache
   };
 
   const logout = () => {
@@ -34,6 +39,9 @@ export function AuthProvider({ children }) {
     setToken(null);
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+
+    // Clear queries when logging out
+    queryClient.clear(); // <-- very important
   };
 
   return (

@@ -14,7 +14,6 @@ const navItems = [
   { label: "AI Chat", icon: MdSmartToy, path: "/ai-chat" },
   { label: "Study Planner", icon: MdCalendarToday, path: "/study-planner" },
   { label: "Pomodoro", icon: MdTimer, path: "/pomodoro" },
-  { label: "Reports", icon: MdAssessment, path: "/reports" },
 ];
 
 export default function Sidebar() {

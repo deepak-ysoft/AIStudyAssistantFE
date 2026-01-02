@@ -8,11 +8,13 @@ import { PrimaryButton } from "../../components/PrimaryButton";
 import FormInput from "../../components/FormInput";
 import { IKContext, IKUpload } from "imagekitio-react";
 import { useAuth } from "../../context/AuthContext";
+import { useToast } from "../../components/ToastContext";
 
 export default function ProfilePage() {
   const { user, setUserData } = useAuth();
   const [avatarPreview, setAvatarPreview] = useState("");
 
+  const { showToast } = useToast();
   const [isEditMode, setIsEditMode] = useState(false);
 
   const [profileData, setProfileData] = useState({
@@ -33,6 +35,10 @@ export default function ProfilePage() {
     queryKey: ["profile"],
     queryFn: authApi.getProfile,
     select: (res) => res.data?.data,
+    // 👇 IMPORTANT
+    staleTime: 0, // always stale
+    refetchOnMount: "always", // refetch when page opens
+    refetchOnWindowFocus: true, // refetch when user comes back to tab
   });
 
   useEffect(() => {
@@ -58,10 +64,17 @@ export default function ProfilePage() {
 
   const updateProfileMutation = useMutation({
     mutationFn: authApi.updateProfile,
-    onSuccess: () => {
+    onSuccess: (response) => {
       setIsEditMode(false);
       setOriginalProfile(profileData);
       setUserData(profileData);
+      showToast(
+        response.data.message,
+        response.data.success ? "success" : "error"
+      );
+    },
+    onError: (response) => {
+      showToast(response.data.message, "error");
     },
   });
 

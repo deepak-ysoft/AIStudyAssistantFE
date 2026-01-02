@@ -10,6 +10,7 @@ import { PrimaryButton } from "../../../components/PrimaryButton";
 import PageHeader from "../../../components/PageHeader";
 import { FiCheckCircle, FiXCircle } from "react-icons/fi";
 import { RiTimerFill } from "react-icons/ri";
+import { useToast } from "../../../components/ToastContext";
 
 export default function SubjectQuizzesPage({ subjectId }) {
   const [showModal, setShowModal] = useState(false);
@@ -24,6 +25,7 @@ export default function SubjectQuizzesPage({ subjectId }) {
   const [showResult, setShowResult] = useState(false);
   const [quizEndedByTimeout, setQuizEndedByTimeout] = useState(false);
 
+  const { showToast } = useToast();
   const [formData, setFormData] = useState({
     title: "",
     duration: "",
@@ -58,6 +60,10 @@ export default function SubjectQuizzesPage({ subjectId }) {
     queryFn: () => quizApi.getAll({ subject: subjectId }),
     select: (res) => res.data?.data || [],
     enabled: !!subjectId,
+    // 👇 IMPORTANT
+    staleTime: 0, // always stale
+    refetchOnMount: "always", // refetch when page opens
+    refetchOnWindowFocus: true, // refetch when user comes back to tab
   });
   /* ------------------ QUESTION HELPERS ------------------ */
 
@@ -117,8 +123,23 @@ export default function SubjectQuizzesPage({ subjectId }) {
   };
 
   const finishQuiz = () => {
-    console.log("Finishing quiz");
     setShowResult(true);
+
+    if (!activeQuiz) return;
+
+    const timeSpent = activeQuiz.duration
+      ? activeQuiz.duration * 60 - timeLeft
+      : 0;
+
+    const passed = score > (activeQuiz.passingMarks || 0);
+    saveQuizAttemptMutation.mutate({
+      quizId: activeQuiz._id,
+      userId: "CURRENT_USER_ID", // replace with actual logged-in user id
+      answers,
+      score,
+      passed,
+      timeTaken: timeSpent,
+    });
   };
 
   const startQuiz = (quiz) => {
@@ -156,31 +177,61 @@ export default function SubjectQuizzesPage({ subjectId }) {
 
   const createMutation = useMutation({
     mutationFn: quizApi.create,
-    onSuccess: () => {
+    onSuccess: (response) => {
       closeModal();
       refetch();
+      showToast(
+        response.data.message,
+        response.data.success ? "success" : "error"
+      );
+    },
+    onError: (response) => {
+      showToast(response.data.message, "error");
     },
   });
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => quizApi.update(id, data),
-    onSuccess: () => {
+    onSuccess: (response) => {
       closeModal();
       refetch();
+      showToast(
+        response.data.message,
+        response.data.success ? "success" : "error"
+      );
+    },
+    onError: (response) => {
+      showToast(response.data.message, "error");
     },
   });
 
   const deleteMutation = useMutation({
     mutationFn: quizApi.delete,
-    onSuccess: () => {
+    onSuccess: (response) => {
       setShowDeleteModal(false);
       setSelectedQuiz(null);
       refetch();
+      showToast(
+        response.data.message,
+        response.data.success ? "success" : "error"
+      );
+    },
+    onError: (response) => {
+      showToast(response.data.message, "error");
     },
   });
 
-  const startQuizMutation = useMutation({
-    mutationFn: quizApi.startQuiz,
+  const saveQuizAttemptMutation = useMutation({
+    mutationFn: (attemptData) => quizApi.saveAttempt(attemptData),
+    onSuccess: (response) => {
+      showToast(
+        response.data.message,
+        response.data.success ? "success" : "error"
+      );
+    },
+    onError: (response) => {
+      showToast(response.data.message, "error");
+    },
   });
 
   /* ------------------ HELPERS ------------------ */
@@ -442,7 +493,7 @@ export default function SubjectQuizzesPage({ subjectId }) {
 
               <p className="mt-1">
                 Status:{" "}
-                {score >= activeQuiz.passingMarks ? (
+                {score > activeQuiz.passingMarks ? (
                   <span className="text-success font-semibold">Passed</span>
                 ) : (
                   <span className="text-error font-semibold">Failed</span>

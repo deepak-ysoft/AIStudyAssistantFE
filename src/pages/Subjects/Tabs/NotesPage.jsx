@@ -13,6 +13,7 @@ import { TbCards } from "react-icons/tb";
 import { MdOutlineQuiz } from "react-icons/md";
 import PageHeader from "../../../components/PageHeader";
 import { MdOutlineSummarize } from "react-icons/md";
+import { useToast } from "../../../components/ToastContext";
 
 export default function SubjectNotesPage({ subjectId }) {
   const [showModal, setShowModal] = useState(false);
@@ -21,13 +22,12 @@ export default function SubjectNotesPage({ subjectId }) {
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedNote, setSelectedNote] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [successMessage, setSuccessMessage] = useState("");
-  const [errorMessage, setErrorsMessage] = useState("");
   const [formData, setFormData] = useState({
     title: "",
     content: "",
     subject: subjectId,
   });
+  const { showToast } = useToast();
 
   /* ------------------ QUERIES ------------------ */
 
@@ -40,59 +40,103 @@ export default function SubjectNotesPage({ subjectId }) {
     queryFn: () => notesApi.getAll({ subject: subjectId }),
     select: (res) => res.data?.data || [],
     enabled: !!subjectId,
+    // 👇 IMPORTANT
+    staleTime: 0, // always stale
+    refetchOnMount: "always", // refetch when page opens
+    refetchOnWindowFocus: true, // refetch when user comes back to tab
   });
 
   /* ------------------ MUTATIONS ------------------ */
 
   const createMutation = useMutation({
     mutationFn: notesApi.create,
-    onSuccess: () => {
+    onSuccess: (response) => {
       closeModal();
       refetch();
+      showToast(
+        response.data.message,
+        response.data.success ? "success" : "error"
+      );
+    },
+    onError: (response) => {
+      showToast(response.data.message, "error");
     },
   });
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => notesApi.update(id, data),
-    onSuccess: () => {
+    onSuccess: (response) => {
       closeModal();
       refetch();
+      showToast(
+        response.data.message,
+        response.data.success ? "success" : "error"
+      );
+    },
+    onError: (response) => {
+      showToast(response.data.message, "error");
     },
   });
 
   const deleteMutation = useMutation({
     mutationFn: notesApi.delete,
-    onSuccess: () => {
+    onSuccess: (response) => {
       setShowDeleteModal(false);
       setSelectedNote(null);
       refetch();
+      showToast(
+        response.data.message,
+        response.data.success ? "success" : "error"
+      );
+    },
+    onError: (response) => {
+      showToast(response.data.message, "error");
     },
   });
 
   const summarizeMutation = useMutation({
     mutationFn: aiApi.generateSummary,
-    onSuccess: (res, noteId) => {
-      const updatedNote = res?.data?.data;
+    onSuccess: (response) => {
+      const updatedNote = response?.data?.data;
 
       if (updatedNote) {
         openDetailsModal(updatedNote); // ✅ fresh data
       }
 
       refetch(); // keep list in sync
+      showToast(
+        response.data.message,
+        response.data.success ? "success" : "error"
+      );
+    },
+    onError: (response) => {
+      showToast(response.data.message, "error");
     },
   });
 
   const flashcardMutation = useMutation({
     mutationFn: aiApi.generateFlashcards,
-    onSuccess: () => {
-      setErrorsMessage("Flashcards generated successfully");
+    onSuccess: (response) => {
+      showToast(
+        response.data.message,
+        response.data.success ? "success" : "error"
+      );
+    },
+    onError: (response) => {
+      showToast(response.data.message, "error");
     },
   });
 
   const generateMCQsMutation = useMutation({
     mutationFn: aiApi.generateMCQs,
-    onSuccess: () => {
-      setSuccessMessage("MCQs generated successfully");
+    onSuccess: (response) => {
+      showToast(
+        response.data.message,
+        response.data.success ? "success" : "error"
+      );
+    },
+    onError: (response) => {
+      showToast(response.data.message, "error");
     },
   });
 
@@ -148,21 +192,6 @@ export default function SubjectNotesPage({ subjectId }) {
 
   return (
     <div>
-      {successMessage ||
-        (errorMessage && (
-          <div class="toast toast-top toast-end z-50">
-            {successMessage && (
-              <div class="alert alert-info">
-                <span>{successMessage}</span>
-              </div>
-            )}
-            {errorMessage && (
-              <div class="alert alert-error">
-                <span>{errorMessage}</span>
-              </div>
-            )}
-          </div>
-        ))}
       {/* HEADER */}
       <PageHeader
         icon={MdNotes}
