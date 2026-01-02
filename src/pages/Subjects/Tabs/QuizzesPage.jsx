@@ -24,6 +24,11 @@ export default function SubjectQuizzesPage({ subjectId }) {
   const [timeLeft, setTimeLeft] = useState(0);
   const [showResult, setShowResult] = useState(false);
   const [quizEndedByTimeout, setQuizEndedByTimeout] = useState(false);
+  const [errors, setErrors] = useState({
+    title: "",
+    duration: "",
+    questions: [], // [{ question: "", options: ["", "", "", ""], correctAnswer: "" }]
+  });
 
   const { showToast } = useToast();
   const [formData, setFormData] = useState({
@@ -235,14 +240,85 @@ export default function SubjectQuizzesPage({ subjectId }) {
   });
 
   /* ------------------ HELPERS ------------------ */
+  const emptyErrors = {
+    title: "",
+    duration: "",
+    questions: [],
+  };
+
+  const validate = () => {
+    const newErrors = {
+      title: "",
+      duration: "",
+      questions: [],
+    };
+
+    // ---- Title ----
+    if (!formData.title.trim()) {
+      newErrors.title = "Quiz title is required";
+    } else if (formData.title.length < 3) {
+      newErrors.title = "Title must be at least 3 characters";
+    }
+
+    // ---- Duration ----
+    if (!formData.duration) {
+      newErrors.duration = "Quiz duration is required";
+    } else if (formData.duration && formData.duration <= 0) {
+      newErrors.duration = "Duration must be greater than 0";
+    }
+
+    // ---- Questions ----
+    if (!formData.questions.length) {
+      showToast("Add at least one question", "error");
+      return false;
+    }
+
+    formData.questions.forEach((q, qIndex) => {
+      const qError = {
+        question: "",
+        options: ["", "", "", ""],
+        correctAnswer: "",
+      };
+
+      if (!q.question.trim()) {
+        qError.question = "Question is required";
+      }
+
+      q.options.forEach((opt, oIndex) => {
+        if (!opt.trim()) {
+          qError.options[oIndex] = "Option is required";
+        }
+      });
+
+      if (q.correctAnswer === undefined || q.correctAnswer === null) {
+        qError.correctAnswer = "Select correct answer";
+      }
+
+      newErrors.questions[qIndex] = qError;
+    });
+
+    setErrors(newErrors);
+
+    // ---- Final check ----
+    const hasErrors =
+      newErrors.title ||
+      newErrors.duration ||
+      newErrors.questions.some(
+        (q) => q.question || q.correctAnswer || q.options.some((o) => o)
+      );
+
+    return !hasErrors;
+  };
 
   const openCreateModal = () => {
+    setErrors(emptyErrors);
     setIsEditMode(false);
     setFormData({ title: "", duration: "", subject: subjectId, questions: [] });
     setShowModal(true);
   };
 
   const openEditModal = (quiz) => {
+    setErrors(emptyErrors);
     setIsEditMode(true);
     setSelectedQuiz(quiz);
     setFormData({
@@ -264,13 +340,14 @@ export default function SubjectQuizzesPage({ subjectId }) {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (!formData.questions.length) return alert("Add at least one question");
+    if (!validate()) return;
 
     if (isEditMode) {
       updateMutation.mutate({ id: selectedQuiz._id, data: formData });
     } else {
       createMutation.mutate(formData);
     }
+    setErrors(emptyErrors);
   };
 
   /* ------------------ UI ------------------ */
@@ -578,20 +655,24 @@ export default function SubjectQuizzesPage({ subjectId }) {
             label="Title"
             placeholder="Quiz title"
             value={formData.title}
-            onChange={(e) =>
-              setFormData({ ...formData, title: e.target.value })
-            }
+            onChange={(e) => {
+              setFormData({ ...formData, title: e.target.value });
+              setErrors({ ...errors, title: "" });
+            }}
             required
+            error={errors.title}
           />
 
           <FormInput
             label="Duration (minutes)"
             type="number"
-            placeholder="Optional"
             value={formData.duration}
-            onChange={(e) =>
-              setFormData({ ...formData, duration: e.target.value })
-            }
+            onChange={(e) => {
+              setFormData({ ...formData, duration: e.target.value });
+              setErrors({ ...errors, duration: "" });
+            }}
+            required
+            error={errors.duration}
           />
 
           <div className="space-y-4">
@@ -622,10 +703,22 @@ export default function SubjectQuizzesPage({ subjectId }) {
                 <FormInput
                   placeholder="Question text"
                   value={q.question}
-                  onChange={(e) =>
-                    updateQuestion(qIndex, "question", e.target.value)
-                  }
-                  required
+                  onChange={(e) => {
+                    updateQuestion(qIndex, "question", e.target.value);
+
+                    const updatedErrors = [...(errors.questions || [])];
+                    if (!updatedErrors[qIndex]) {
+                      updatedErrors[qIndex] = {
+                        question: "",
+                        options: [],
+                        correctAnswer: "",
+                      };
+                    }
+
+                    updatedErrors[qIndex].question = "";
+                    setErrors({ ...errors, questions: updatedErrors });
+                  }}
+                  error={errors.questions?.[qIndex]?.question}
                 />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -642,15 +735,45 @@ export default function SubjectQuizzesPage({ subjectId }) {
                           updateQuestion(qIndex, "correctAnswer", oIndex)
                         }
                       />
-                      <input
-                        className="input input-ghost w-full"
-                        placeholder={`Option ${oIndex + 1}`}
-                        value={opt}
-                        onChange={(e) =>
-                          updateOption(qIndex, oIndex, e.target.value)
-                        }
-                        required
-                      />
+                      <div className="flex-1">
+                        <input
+                          className="input input-ghost w-full"
+                          value={opt}
+                          placeholder={`Option ${oIndex + 1}`}
+                          onChange={(e) => {
+                            updateOption(qIndex, oIndex, e.target.value);
+
+                            setErrors((prev) => {
+                              const questionsErrors = prev.questions
+                                ? [...prev.questions]
+                                : [];
+
+                              if (!questionsErrors[qIndex]) {
+                                questionsErrors[qIndex] = {
+                                  options: [],
+                                  correctAnswer: "",
+                                };
+                              }
+
+                              if (!questionsErrors[qIndex].options) {
+                                questionsErrors[qIndex].options = [];
+                              }
+
+                              questionsErrors[qIndex].options[oIndex] = "";
+
+                              return {
+                                ...prev,
+                                questions: questionsErrors,
+                              };
+                            });
+                          }}
+                        />
+                        {errors.questions?.[qIndex]?.options?.[oIndex] && (
+                          <p className="text-xs text-error mt-1">
+                            {errors.questions[qIndex].options[oIndex]}
+                          </p>
+                        )}
+                      </div>
                     </label>
                   ))}
                 </div>

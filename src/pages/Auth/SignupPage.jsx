@@ -15,7 +15,7 @@ export default function SignupPage() {
     password: "",
     confirmPassword: "",
   });
-  const [error, setError] = useState("");
+  const [errors, setErrors] = useState({});
   const navigate = useNavigate();
   const { login } = useAuth();
 
@@ -35,15 +35,50 @@ export default function SignupPage() {
     },
   });
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setError("");
+  const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const PASSWORD_REGEX = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{8,}$/;
 
-    if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match");
-      return;
+  const validate = () => {
+    const newErrors = {};
+
+    // Name
+    if (!formData.name.trim()) {
+      newErrors.name = "User name is required";
+    } else if (formData.name.trim().length < 3) {
+      newErrors.name = "Name must be at least 3 characters";
     }
 
+    // Email
+    if (!formData.email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!EMAIL_REGEX.test(formData.email)) {
+      newErrors.email = "Enter a valid email address";
+    }
+
+    // Password
+    if (!formData.password) {
+      newErrors.password = "Password is required";
+    } else if (formData.password.length < 8) {
+      newErrors.password = "Password must be at least 8 characters";
+    } else if (!PASSWORD_REGEX.test(formData.password)) {
+      newErrors.password =
+        "Password must contain at least one letter and one number";
+    }
+
+    // Confirm password
+    if (!formData.confirmPassword) {
+      newErrors.confirmPassword = "Please confirm your password";
+    } else if (formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = "Passwords do not match";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!validate()) return;
     const { confirmPassword, ...submitData } = formData;
     signupMutation.mutate(submitData);
   };
@@ -55,8 +90,12 @@ export default function SignupPage() {
         type="text"
         placeholder="Enter your full name"
         value={formData.name}
-        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+        onChange={(e) => {
+          setFormData({ ...formData, name: e.target.value });
+          setErrors((prev) => ({ ...prev, name: "" }));
+        }}
         required
+        error={errors.name}
       />
 
       <FormInput
@@ -64,8 +103,12 @@ export default function SignupPage() {
         type="email"
         placeholder="Enter your email"
         value={formData.email}
-        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+        onChange={(e) => {
+          setFormData({ ...formData, email: e.target.value }),
+            setErrors((prev) => ({ ...prev, email: "" }));
+        }}
         required
+        error={errors.email}
       />
 
       <FormInput
@@ -73,8 +116,12 @@ export default function SignupPage() {
         type="password"
         placeholder="Enter password"
         value={formData.password}
-        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+        onChange={(e) => {
+          setFormData({ ...formData, password: e.target.value }),
+            setErrors((prev) => ({ ...prev, password: "" }));
+        }}
         required
+        error={errors.password}
       />
 
       <FormInput
@@ -82,29 +129,13 @@ export default function SignupPage() {
         type="password"
         placeholder="Enter confirm password"
         value={formData.confirmPassword}
-        onChange={(e) =>
-          setFormData({ ...formData, confirmPassword: e.target.value })
-        }
+        onChange={(e) => {
+          setFormData({ ...formData, confirmPassword: e.target.value });
+          setErrors((prev) => ({ ...prev, confirmPassword: "" }));
+        }}
         required
+        error={errors.confirmPassword}
       />
-      {error && (
-        <div className="alert alert-error">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="stroke-current shrink-0 h-6 w-6"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M10 14l-2-2m0 0l-2-2m2 2l2-2m-2 2l-2 2m2-2l2 2m6-8a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
-          <span>{error}</span>
-        </div>
-      )}
       <PrimaryButton type="submit" loading={signupMutation.isPending}>
         Create Account
       </PrimaryButton>

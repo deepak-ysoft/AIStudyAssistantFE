@@ -18,6 +18,7 @@ export default function SubjectsPage() {
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedSubject, setSelectedSubject] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [errors, setErrors] = useState({});
   const navigate = useNavigate();
 
   const { showToast } = useToast();
@@ -92,10 +93,28 @@ export default function SubjectsPage() {
 
   /* ---------------- HELPERS ---------------- */
 
+  const validate = () => {
+    const newErrors = {};
+
+    if (!formData.name.trim()) {
+      newErrors.name = "Subject name is required";
+    } else if (formData.name.length < 3) {
+      newErrors.name = "Name must be at least 3 characters";
+    }
+
+    if (formData.description.length < 100) {
+      newErrors.description = "Description must be at least 100 characters";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const openCreateModal = () => {
     setIsEditMode(false);
     setFormData({ name: "", description: "" });
     setShowModal(true);
+    setErrors({});
   };
 
   const openEditModal = (subject) => {
@@ -103,6 +122,7 @@ export default function SubjectsPage() {
     setSelectedSubject(subject);
     setFormData({ name: subject.name, description: subject.description });
     setShowModal(true);
+    setErrors({});
   };
 
   const closeModal = () => {
@@ -110,16 +130,20 @@ export default function SubjectsPage() {
     setIsEditMode(false);
     setSelectedSubject(null);
     setFormData({ name: "", description: "" });
+    setErrors({});
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    if (!validate()) return;
 
     if (isEditMode) {
       updateMutation.mutate({ id: selectedSubject._id, data: formData });
     } else {
       createMutation.mutate(formData);
     }
+    setErrors({});
   };
 
   const openDetailsModal = (note) => {
@@ -250,8 +274,12 @@ export default function SubjectsPage() {
             label="Name"
             placeholder="Subject name"
             value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            onChange={(e) => {
+              setFormData({ ...formData, name: e.target.value });
+              setErrors({ ...errors, name: "" }); // clear on change
+            }}
             required
+            error={errors.name}
           />
 
           <FormInput
@@ -259,9 +287,11 @@ export default function SubjectsPage() {
             type="textarea"
             placeholder="Short description (optional)"
             value={formData.description}
-            onChange={(e) =>
-              setFormData({ ...formData, description: e.target.value })
-            }
+            onChange={(e) => {
+              setFormData({ ...formData, description: e.target.value });
+              setErrors({ ...errors, description: "" });
+            }}
+            error={errors.description}
           />
 
           <div className="flex justify-end gap-2 pt-4">

@@ -13,12 +13,11 @@ import { useToast } from "../../../components/ToastContext";
 export default function SubjectFlashcardsPage({ subjectId }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
-
   const [showModal, setShowModal] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedCard, setSelectedCard] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-
+  const [errors, setErrors] = useState({});
   const { showToast } = useToast();
   const [formData, setFormData] = useState({
     question: "",
@@ -109,13 +108,33 @@ export default function SubjectFlashcardsPage({ subjectId }) {
 
   /* ---------------- HELPERS ---------------- */
 
+  const validate = () => {
+    const newErrors = {};
+
+    if (!formData.question.trim()) {
+      newErrors.question = "Question is required";
+    } else if (formData.question.length < 20) {
+      newErrors.question = "Question must be at least 20 characters";
+    }
+    if (!formData.answer.trim()) {
+      newErrors.answer = "Answer is required";
+    } else if (formData.answer.length < 20) {
+      newErrors.answer = "Answer must be at least 20 characters";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const openCreateModal = () => {
+    setErrors({});
     setIsEditMode(false);
     setFormData({ question: "", answer: "", subject: subjectId });
     setShowModal(true);
   };
 
   const openEditModal = (card) => {
+    setErrors({});
     setIsEditMode(true);
     setSelectedCard(card);
     setFormData({
@@ -135,11 +154,14 @@ export default function SubjectFlashcardsPage({ subjectId }) {
   const handleSubmit = (e) => {
     e.preventDefault();
 
+    if (!validate()) return;
+
     if (isEditMode) {
       updateMutation.mutate({ id: selectedCard._id, data: formData });
     } else {
       createMutation.mutate(formData);
     }
+    setErrors({});
   };
 
   const handleNext = () => {
@@ -300,10 +322,12 @@ export default function SubjectFlashcardsPage({ subjectId }) {
             type="textarea"
             placeholder="Enter the question"
             value={formData.question}
-            onChange={(e) =>
-              setFormData({ ...formData, question: e.target.value })
-            }
+            onChange={(e) => {
+              setFormData({ ...formData, question: e.target.value }),
+                setErrors({ ...errors, question: "" });
+            }}
             required
+            error={errors.question}
           />
 
           <FormInput
@@ -311,10 +335,12 @@ export default function SubjectFlashcardsPage({ subjectId }) {
             type="textarea"
             placeholder="Enter the answer"
             value={formData.answer}
-            onChange={(e) =>
-              setFormData({ ...formData, answer: e.target.value })
-            }
+            onChange={(e) => {
+              setFormData({ ...formData, answer: e.target.value }),
+                setErrors({ ...errors, answer: "" });
+            }}
             required
+            error={errors.answer}
           />
 
           <div className="flex justify-end gap-2 pt-4">

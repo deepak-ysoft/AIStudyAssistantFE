@@ -12,8 +12,10 @@ import { useToast } from "../../components/ToastContext";
 
 export default function SettingsPage() {
   const { logout } = useAuth();
+  const [errors, setErrors] = useState({});
+  const [mailErrors, setMailErrors] = useState({});
   const navigate = useNavigate();
-    const { showToast } = useToast();
+  const { showToast } = useToast();
 
   /* ---------------- CHANGE PASSWORD ---------------- */
 
@@ -41,17 +43,52 @@ export default function SettingsPage() {
     },
   });
 
+  const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const PASSWORD_REGEX = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{8,}$/;
+
+  const validatePassword = () => {
+    const newErrors = {};
+
+    if (!password.current) {
+      newErrors.current = "Current password is required";
+    }
+
+    if (!password.new) {
+      newErrors.new = "New password is required";
+    } else if (password.new.length < 8) {
+      newErrors.new = "Password must be at least 8 characters";
+    } else if (!PASSWORD_REGEX.test(password.new)) {
+      newErrors.new =
+        "Password must contain at least one letter and one number";
+    }
+
+    if (!password.confirm) {
+      newErrors.confirm = "Please confirm your password";
+    } else if (password.new !== password.confirm) {
+      newErrors.confirm = "Passwords do not match";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+  const validateEmail = () => {
+    const newErrors = {};
+
+    if (!newEmail.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!EMAIL_REGEX.test(newEmail)) {
+      newErrors.email = "Enter a valid email address";
+    } else if (newEmail === useAuth().user?.email) {
+      newErrors.email = "New email must be different from current email";
+    }
+
+    setMailErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleChangePassword = (e) => {
     e.preventDefault();
-
-    if (password.new.length < 6) {
-      return alert("Password must be at least 6 characters");
-    }
-
-    if (password.new !== password.confirm) {
-      return alert("Passwords do not match");
-    }
-
+    if (!validatePassword()) return;
     changePasswordMutation.mutate();
   };
 
@@ -114,23 +151,31 @@ export default function SettingsPage() {
             </div>
 
             {/* RIGHT FORM */}
-            <div className="flex flex-col sm:flex-row gap-3 items-end">
+            <div className="flex flex-col sm:flex-row gap-3 items-stretch">
               <div className="w-full">
                 <FormInput
                   label="New Email Address"
                   type="email"
                   value={newEmail}
-                  onChange={(e) => setNewEmail(e.target.value)}
-                  required
+                  onChange={(e) => {
+                    setNewEmail(e.target.value);
+                    setMailErrors({ ...mailErrors, email: "" });
+                  }}
+                  error={mailErrors.email}
                 />
               </div>
 
-              <PrimaryButton
-                onClick={() => changeEmailMutation.mutate()}
-                loading={changeEmailMutation.isPending}
-              >
-                Send Verification
-              </PrimaryButton>
+              <div className="mt-0 sm:mt-7">
+                <PrimaryButton
+                  onClick={() => {
+                    if (!validateEmail()) return;
+                    changeEmailMutation.mutate();
+                  }}
+                  loading={changeEmailMutation.isPending}
+                >
+                  Send Verification
+                </PrimaryButton>
+              </div>
             </div>
           </div>
         </section>
@@ -142,35 +187,42 @@ export default function SettingsPage() {
           <form
             onSubmit={handleChangePassword}
             className="grid grid-cols-1 lg:grid-cols-3 gap-4"
+            noValidate
           >
             <FormInput
               label="Current Password"
               type="password"
               value={password.current}
-              onChange={(e) =>
-                setPassword({ ...password, current: e.target.value })
-              }
+              onChange={(e) => {
+                setPassword({ ...password, current: e.target.value }),
+                  setErrors({ ...errors, current: "" });
+              }}
               required
+              error={errors.current}
             />
 
             <FormInput
               label="New Password"
               type="password"
               value={password.new}
-              onChange={(e) =>
-                setPassword({ ...password, new: e.target.value })
-              }
+              onChange={(e) => {
+                setPassword({ ...password, new: e.target.value }),
+                  setErrors({ ...errors, new: "" });
+              }}
               required
+              error={errors.new}
             />
 
             <FormInput
               label="Confirm New Password"
               type="password"
               value={password.confirm}
-              onChange={(e) =>
-                setPassword({ ...password, confirm: e.target.value })
-              }
+              onChange={(e) => {
+                setPassword({ ...password, confirm: e.target.value }),
+                  setErrors({ ...errors, confirm: "" });
+              }}
               required
+              error={errors.confirm}
             />
 
             {/* Button row */}

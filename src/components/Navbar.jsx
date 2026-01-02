@@ -11,7 +11,6 @@ export default function Navbar() {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
-
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef(null);
@@ -74,7 +73,7 @@ export default function Navbar() {
                 <img
                   src={
                     user.avatar ||
-                    "https://ik.imagekit.io/z0kfygnm4/AI_Assistant/avtar?updatedAt=1766064351087"
+                    "https://ik.imagekit.io/z0kfygnm4/AI_Assistant/avatar_1767340440548_Ynh1fg4_Dv?updatedAt=1767340444905"
                   }
                   className="p-0.5 h-12 w-12 rounded-full bg-primary"
                   alt="Avatar"

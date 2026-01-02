@@ -12,7 +12,7 @@ export default function RestoreAccountRequestPage() {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const email = searchParams.get("email");
-
+  const [error, setError] = useState("");
   const { showToast } = useToast();
   const [step, setStep] = useState("confirm"); // confirm | otp | success
   const [otp, setOtp] = useState("");
@@ -46,6 +46,7 @@ export default function RestoreAccountRequestPage() {
       setStep("success");
     },
     onError: (response) => {
+      console.log("response.data.", response);
       showToast(response.data.message, "error");
     },
   });
@@ -93,13 +94,30 @@ export default function RestoreAccountRequestPage() {
               <strong>{email}</strong>. Please enter it below to restore your
               account.
             </p>
-
             <FormInput
               type="text"
               value={otp}
               onChange={(e) => setOtp(e.target.value)}
               placeholder="Enter OTP"
             />
+            {error && (
+              <div className="alert alert-error">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="stroke-current shrink-0 h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M10 14l-2-2m0 0l-2-2m2 2l2-2m-2 2l-2 2m2-2l2 2m6-8a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                <span>{error}</span>
+              </div>
+            )}
             <div className="mt-5">
               <PrimaryButton
                 onClick={() => verifyOtpMutation.mutate()}

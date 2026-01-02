@@ -22,6 +22,7 @@ export default function SubjectNotesPage({ subjectId }) {
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedNote, setSelectedNote] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [errors, setErrors] = useState({});
   const [formData, setFormData] = useState({
     title: "",
     content: "",
@@ -142,13 +143,32 @@ export default function SubjectNotesPage({ subjectId }) {
 
   /* ------------------ HELPERS ------------------ */
 
+  const validate = () => {
+    const newErrors = {};
+
+    if (!formData.title.trim()) {
+      newErrors.title = "Notes title is required";
+    } else if (formData.title.length < 3) {
+      newErrors.title = "title must be at least 3 characters";
+    }
+
+    if (formData.content.length < 100) {
+      newErrors.content = "Content must be at least 100 characters";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const openCreateModal = () => {
+    setErrors({});
     setIsEditMode(false);
     setFormData({ title: "", content: "", subject: subjectId });
     setShowModal(true);
   };
 
   const openEditModal = (note) => {
+    setErrors({});
     setIsEditMode(true);
     setSelectedNote(note);
     setFormData({
@@ -168,6 +188,9 @@ export default function SubjectNotesPage({ subjectId }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    if (!validate()) return;
+
     if (isEditMode) {
       updateMutation.mutate({
         id: selectedNote._id,
@@ -176,6 +199,7 @@ export default function SubjectNotesPage({ subjectId }) {
     } else {
       createMutation.mutate(formData);
     }
+    setErrors({});
   };
 
   const openDetailsModal = (note) => {
@@ -350,10 +374,12 @@ export default function SubjectNotesPage({ subjectId }) {
             label="Title"
             placeholder="Give your note a title"
             value={formData.title}
-            onChange={(e) =>
-              setFormData({ ...formData, title: e.target.value })
-            }
+            onChange={(e) => {
+              setFormData({ ...formData, title: e.target.value }),
+                setErrors({ ...errors, title: "" });
+            }}
             required
+            error={errors.title}
           />
 
           <FormInput
@@ -361,9 +387,11 @@ export default function SubjectNotesPage({ subjectId }) {
             type="textarea"
             placeholder="Write something meaningful..."
             value={formData.content}
-            onChange={(e) =>
-              setFormData({ ...formData, content: e.target.value })
-            }
+            onChange={(e) => {
+              setFormData({ ...formData, content: e.target.value }),
+                setErrors({ ...errors, content: "" });
+            }}
+            error={errors.content}
           />
 
           <div className="flex justify-end gap-2 pt-4">

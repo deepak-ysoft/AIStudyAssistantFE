@@ -13,10 +13,10 @@ import { useToast } from "../../components/ToastContext";
 export default function ProfilePage() {
   const { user, setUserData } = useAuth();
   const [avatarPreview, setAvatarPreview] = useState("");
-
+  const [errors, setErrors] = useState({});
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const { showToast } = useToast();
   const [isEditMode, setIsEditMode] = useState(false);
-
   const [profileData, setProfileData] = useState({
     name: "",
     email: "",
@@ -24,7 +24,7 @@ export default function ProfilePage() {
     grade: "",
     studyStreak: "",
     avatar:
-      "https://ik.imagekit.io/z0kfygnm4/AI_Assistant/avtar?updatedAt=1766064351087",
+      "https://ik.imagekit.io/z0kfygnm4/AI_Assistant/avatar_1767340440548_Ynh1fg4_Dv?updatedAt=1767340444905",
   });
 
   const [originalProfile, setOriginalProfile] = useState(null);
@@ -44,19 +44,19 @@ export default function ProfilePage() {
   useEffect(() => {
     if (data) {
       const profile = {
-        name: data.name || "",
-        email: data.email || "",
-        bio: data.bio || "",
-        grade: data.grade || "",
-        studyStreak: data.studyStreak || "",
+        name: data?.name || "",
+        email: data?.email || "",
+        bio: data?.bio || "",
+        grade: data?.grade || "",
+        studyStreak: data?.studyStreak ? `${data.studyStreak} days` : "0 days",
         avatar:
-          data.avatar ||
-          "https://ik.imagekit.io/z0kfygnm4/AI_Assistant/avtar?updatedAt=1766064351087",
+          data?.avatar ||
+          "https://ik.imagekit.io/z0kfygnm4/AI_Assistant/avatar_1767340440548_Ynh1fg4_Dv?updatedAt=1767340444905",
       };
 
       setProfileData(profile);
       setOriginalProfile(profile);
-      setAvatarPreview(user.avatar || profile.avatar);
+      setAvatarPreview(profile.avatar); // ✅ FIX
     }
   }, [data]);
 
@@ -65,21 +65,63 @@ export default function ProfilePage() {
   const updateProfileMutation = useMutation({
     mutationFn: authApi.updateProfile,
     onSuccess: (response) => {
+      const updatedUser = {
+        ...user,
+        ...profileData, // includes updated avatar
+      };
+
       setIsEditMode(false);
       setOriginalProfile(profileData);
-      setUserData(profileData);
+
+      // ✅ Update AuthContext state
+      setUserData(updatedUser);
+
+      // ✅ Persist to localStorage
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+
       showToast(
         response.data.message,
         response.data.success ? "success" : "error"
       );
     },
-    onError: (response) => {
-      showToast(response.data.message, "error");
-    },
   });
+
+  const NAME_REGEX = /^[A-Za-z0-9\s]+$/;
+
+  const GRADES = ["9", "10", "11", "12", "UG", "PG"];
+
+  const validate = () => {
+    const newErrors = {};
+
+    /* -------- Name -------- */
+    if (!profileData.name?.trim()) {
+      newErrors.name = "Full name is required";
+    } else if (profileData.name.trim().length < 3) {
+      newErrors.name = "Name must be at least 3 characters";
+    } else if (!NAME_REGEX.test(profileData.name.trim())) {
+      newErrors.name = "Name can contain only letters and numbers";
+    }
+
+    /* -------- Grade -------- */
+    if (!profileData.grade) {
+      newErrors.grade = "Grade is required";
+    } else if (!GRADES.includes(profileData.grade)) {
+      newErrors.grade = "Invalid grade selected";
+    }
+
+    /* -------- Bio -------- */
+    if (profileData.bio && profileData.bio.length < 100) {
+      newErrors.bio = "Bio must have 100 characters";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleProfileSubmit = (e) => {
     e.preventDefault();
+
+    if (!validate()) return;
 
     const payload = {
       name: profileData.name,
@@ -129,6 +171,7 @@ export default function ProfilePage() {
           <form
             onSubmit={handleProfileSubmit}
             className="grid grid-cols-1 md:grid-cols-2 gap-6"
+            noValidate
           >
             <div className="md:col-span-2 flex flex-col items-center gap-3">
               <IKContext
@@ -137,10 +180,15 @@ export default function ProfilePage() {
                 authenticator={authApi.authenticator}
               >
                 <div
-                  className={`relative  h-28 w-28 rounded-full border-2 border-base-300 overflow-hidden cursor-pointer
-      ${!isEditMode ? "cursor-not-allowed opacity-80" : "hover:opacity-90"}
-    `}
+                  className={`relative h-28 w-28 rounded-full border-2 border-base-300 overflow-hidden
+    ${
+      !isEditMode || isUploadingAvatar
+        ? "cursor-not-allowed opacity-80"
+        : "cursor-pointer hover:opacity-90"
+    }
+  `}
                 >
+                  {/* Avatar image */}
                   {avatarPreview ? (
                     <img
                       src={avatarPreview}
@@ -153,27 +201,47 @@ export default function ProfilePage() {
                     </div>
                   )}
 
-                  {isEditMode && (
+                  {/* Upload loader */}
+                  {isUploadingAvatar && (
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center rounded-full">
+                      <span className="loading loading-spinner loading-md text-white" />
+                    </div>
+                  )}
+
+                  {/* Hover overlay */}
+                  {isEditMode && !isUploadingAvatar && (
                     <div className="absolute inset-0 bg-black/30 flex items-center justify-center text-white text-sm opacity-0 hover:opacity-100 transition">
                       Change
                     </div>
                   )}
 
+                  {/* ImageKit upload */}
                   {isEditMode && (
                     <IKUpload
-                      className="absolute inset-0 opacity-0 cursor-pointer"
+                      className="absolute inset-0 opacity-0"
                       accept="image/*"
                       folder="/AI_Assistant"
                       fileName={`avatar_${Date.now()}`}
+                      disabled={isUploadingAvatar}
+                      onUploadStart={(evt) => {
+                        // 🔥 instant local preview
+                        const file = evt.target.files?.[0];
+                        if (file) {
+                          setAvatarPreview(URL.createObjectURL(file));
+                        }
+                        setIsUploadingAvatar(true);
+                      }}
                       onSuccess={(res) => {
                         setProfileData((prev) => ({
                           ...prev,
-                          avatar: res.url, // ✅ STRING
+                          avatar: res.url, // final CDN URL
                         }));
                         setAvatarPreview(res.url);
+                        setIsUploadingAvatar(false);
                       }}
                       onError={(err) => {
                         console.error("ImageKit upload error", err);
+                        setIsUploadingAvatar(false);
                       }}
                     />
                   )}
@@ -185,10 +253,11 @@ export default function ProfilePage() {
               label="Full Name"
               value={profileData.name}
               disabled={!isEditMode}
-              onChange={(e) =>
-                setProfileData({ ...profileData, name: e.target.value })
-              }
-              required
+              onChange={(e) => {
+                setProfileData({ ...profileData, name: e.target.value });
+                setErrors({ ...errors, name: "" });
+              }}
+              error={errors.name}
             />
 
             <FormInput label="Email" value={profileData.email} disabled />
@@ -203,9 +272,10 @@ export default function ProfilePage() {
               type="select"
               value={profileData.grade}
               disabled={!isEditMode}
-              onChange={(e) =>
-                setProfileData({ ...profileData, grade: e.target.value })
-              }
+              onChange={(e) => {
+                setProfileData({ ...profileData, grade: e.target.value });
+                setErrors({ ...errors, grade: "" });
+              }}
               options={[
                 { label: "9", value: "9" },
                 { label: "10", value: "10" },
@@ -214,6 +284,7 @@ export default function ProfilePage() {
                 { label: "UG", value: "UG" },
                 { label: "PG", value: "PG" },
               ]}
+              error={errors.grade}
             />
 
             <div className="md:col-span-2">

@@ -7,12 +7,13 @@ import { FiCalendar } from "react-icons/fi";
 import PageHeader from "../../components/PageHeader";
 import jsPDF from "jspdf";
 import { useState, useEffect } from "react";
-import { FiPrinter, FiDownload, FiTrash2, FiFileText } from "react-icons/fi";
+import { FiPrinter, FiTrash2, FiFileText } from "react-icons/fi";
 import { HiOutlineDocumentDownload } from "react-icons/hi";
 import { useToast } from "../../components/ToastContext";
 
 export default function StudyPlannerPage() {
   const { showToast } = useToast();
+  const [errors, setErrors] = useState({});
   const [formData, setFormData] = useState({
     availableHours: "",
     subjects: [],
@@ -47,8 +48,36 @@ export default function StudyPlannerPage() {
     },
   });
 
+  const validate = () => {
+    const newErrors = {};
+
+    if (!formData.availableHours) {
+      newErrors.availableHours = "Available hours is required";
+    } else if (formData.availableHours < 10) {
+      newErrors.availableHours = "Available hours must be greater than 10";
+    }
+    const SUBJECT_REGEX = /^[A-Za-z\s]+$/;
+
+    if (
+      !Array.isArray(formData.subjects) ||
+      formData.subjects.length === 0 ||
+      formData.subjects.some(
+        (s) =>
+          typeof s !== "string" || !s.trim() || !SUBJECT_REGEX.test(s.trim())
+      )
+    ) {
+      newErrors.subjects =
+        "Subjects are required and must contain only letters";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleGeneratePlan = (e) => {
     e.preventDefault();
+    if (!validate()) return;
+
     generatePlanMutation.mutate(formData);
   };
 
@@ -158,13 +187,15 @@ export default function StudyPlannerPage() {
                       placeholder="e.g. 20"
                       className="input input-bordered w-full"
                       value={formData.availableHours}
-                      onChange={(e) =>
+                      onChange={(e) => {
                         setFormData({
                           ...formData,
                           availableHours: e.target.value,
-                        })
-                      }
+                        }),
+                          setErrors({ ...errors, availableHours: "" });
+                      }}
                       required
+                      error={errors.availableHours}
                     />
                   </div>
 
@@ -175,14 +206,16 @@ export default function StudyPlannerPage() {
                       label="Subjects"
                       placeholder="Math, Physics, Biology"
                       className="input input-bordered w-full"
-                      onChange={(e) =>
+                      onChange={(e) => {
                         setFormData({
                           ...formData,
                           subjects: e.target.value
                             .split(",")
                             .map((s) => s.trim()),
-                        })
-                      }
+                        }),
+                          setErrors({ ...errors, subjects: "" });
+                      }}
+                      error={errors.subjects}
                     />
                     <label className="label">
                       <span className="label-text-alt text-base-content/60">
