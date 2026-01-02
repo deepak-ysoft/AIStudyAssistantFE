@@ -10,6 +10,7 @@ import { useState, useEffect } from "react";
 import { FiPrinter, FiTrash2, FiFileText } from "react-icons/fi";
 import { HiOutlineDocumentDownload } from "react-icons/hi";
 import { useToast } from "../../components/ToastContext";
+import { studyPlanApi } from "../../api/studyPlanApi";
 
 export default function StudyPlannerPage() {
   const { showToast } = useToast();
@@ -21,30 +22,42 @@ export default function StudyPlannerPage() {
   const [plan, setPlan] = useState(null);
 
   useEffect(() => {
-    const savedPlan = localStorage.getItem("weekly-study-plan");
-    if (savedPlan) setPlan(savedPlan);
+    const fetchPlan = async () => {
+      try {
+        const res = await studyPlanApi.get();
+        setPlan(res.data?.data?.plan || null);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchPlan();
   }, []);
 
-  useEffect(() => {
-    if (plan) localStorage.setItem("weekly-study-plan", plan);
-  }, [plan]);
-
-  const clearPlan = () => {
-    localStorage.removeItem("weekly-study-plan");
-    setPlan(null);
+  const clearPlan = async () => {
+    try {
+      await studyPlanApi.clear();
+      setPlan(null);
+      showToast("Study plan cleared", "success");
+    } catch (error) {
+      showToast("Failed to clear study plan", "error");
+    }
   };
+
   const generatePlanMutation = useMutation({
     mutationFn: (data) =>
       aiApi.generateStudyPlan(data.availableHours, data.subjects),
+
     onSuccess: (response) => {
       setPlan(response.data?.data?.plan);
-      showToast(
-        response.data.message,
-        response.data.success ? "success" : "error"
-      );
+      showToast("Study plan generated successfully", "success");
     },
-    onError: (response) => {
-      showToast(response.data.message, "error");
+
+    onError: (error) => {
+      showToast(
+        error.response?.data?.message || "Failed to generate plan",
+        "error"
+      );
     },
   });
 

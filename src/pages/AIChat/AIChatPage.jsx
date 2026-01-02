@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { aiApi } from "../../api/aiApi";
+import { chatApi } from "../../api/chatApi";
 import { MdSmartToy } from "react-icons/md";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import FormInput from "../../components/FormInput";
@@ -11,107 +12,101 @@ import { useToast } from "../../components/ToastContext";
 
 export default function AIChatPage() {
   const { showToast } = useToast();
-  const [messages, setMessages] = useState(() => {
-    const saved = localStorage.getItem("ai-chat-messages");
-    if (saved) {
-      return JSON.parse(saved);
-    }
-
-    return [
-      {
-        id: 1,
-        text: "Hello! I'm your AI Study Assistant. Ask me anything about your studies!",
-        sender: "ai",
-        deleted: false,
-      },
-    ];
-  });
-
+  const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState("");
   const messagesEndRef = useRef(null);
 
+  /* ---------------- LOAD CHAT HISTORY ---------------- */
+  useEffect(() => {
+    chatApi
+      .getHistory()
+      .then((res) => {
+        const data = res.data.data.messages;
+
+        setMessages(
+          data.length
+            ? data
+            : [
+                {
+                  _id: "welcome",
+                  text: "Hello! I'm your AI Study Assistant. Ask me anything about your studies!",
+                  sender: "ai",
+                },
+              ]
+        );
+      })
+      .catch(() => {
+        showToast("Failed to load chat history", "error");
+      });
+  }, []);
+
+  /* ---------------- SEND MESSAGE ---------------- */
   const chatMutation = useMutation({
     mutationFn: (payload) => aiApi.chat(payload),
-    onSuccess: (response) => {
-      showToast(
-        response.data.message,
-        response.data.success ? "success" : "error"
-      );
-      const aiMessage = response.data?.data?.response;
-      if (aiMessage) {
-        setMessages((prev) => [
-          ...prev,
-          { id: Date.now(), text: aiMessage, sender: "ai" },
-        ]);
-      }
+    onSuccess: (res) => {
+      const { userMessage, aiMessage } = res.data.data;
+
+      setMessages((prev) => [...prev, userMessage, aiMessage]);
     },
-    onError: (response) => {
-      showToast(response.data.message, "error");
+    onError: () => {
+      showToast("Failed to get AI response", "error");
     },
   });
 
-  useEffect(() => {
-    localStorage.setItem("ai-chat-messages", JSON.stringify(messages));
-  }, [messages]);
-
+  /* ---------------- AUTO SCROLL ---------------- */
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const clearMessage = (id) => {
-    setMessages((prev) =>
-      prev
-        .map((msg) => {
-          if (msg.id === id) {
-            if (msg.deleted) {
-              // Already soft deleted -> remove it
-              return null;
-            } else {
-              // First delete -> mark as deleted
-              return { ...msg, text: "Message is deleted", deleted: true };
-            }
-          }
-          return msg;
-        })
-        .filter(Boolean)
-    );
+  /* ---------------- DELETE SINGLE MESSAGE ---------------- */
+  const clearMessage = async (id) => {
+    try {
+      await chatApi.deleteChat(id);
+
+      setMessages((prev) =>
+        prev
+          .map((msg) =>
+            msg._id === id
+              ? msg.deleted
+                ? null
+                : { ...msg, text: "Message is deleted", deleted: true }
+              : msg
+          )
+          .filter(Boolean)
+      );
+    } catch {
+      showToast("Failed to delete message", "error");
+    }
   };
 
-  const clearAllMessages = () => {
-    localStorage.removeItem("ai-chat-messages");
-    setMessages([
-      {
-        id: 1,
-        text: "Hello! I'm your AI Study Assistant. Ask me anything about your studies!",
-        sender: "ai",
-      },
-    ]);
+  /* ---------------- CLEAR ALL CHAT ---------------- */
+  const clearAllMessages = async () => {
+    try {
+      await chatApi.clearHistory();
+
+      setMessages([
+        {
+          _id: "welcome",
+          text: "Hello! I'm your AI Study Assistant. Ask me anything about your studies!",
+          sender: "ai",
+        },
+      ]);
+    } catch {
+      showToast("Failed to clear chat", "error");
+    }
   };
 
+  /* ---------------- SEND HANDLER ---------------- */
   const handleSendMessage = (e) => {
     e.preventDefault();
     if (!inputValue.trim()) return;
 
-    const userMessage = {
-      id: Date.now(),
-      text: inputValue,
-      sender: "user",
-    };
-
-    const updatedMessages = [...messages, userMessage];
-    setMessages(updatedMessages);
-
-    chatMutation.mutate({
-      message: inputValue,
-      history: updatedMessages.slice(-6), // last 6 messages only
-    });
-
+    chatMutation.mutate({ message: inputValue });
     setInputValue("");
   };
 
   return (
     <div>
-      {/* HEADER */}
       <PageHeader
         icon={MdSmartToy}
         title="AI Chat Assistant"
@@ -119,24 +114,15 @@ export default function AIChatPage() {
       />
 
       <div className="rounded-3xl border border-base-300 bg-gradient-to-br from-primary/10 via-base-100 to-secondary/10 p-3 h-[calc(80vh-100px)]">
-        <div className="flex justify-end mb-2">
-          <div className="dropdown dropdown-end">
+        {/* HEADER MENU */}
+        <div className="flex justify-end mb-2 ">
+          <div className="dropdown dropdown-end z-10">
             <label tabIndex={0} className="btn btn-sm btn-ghost">
               <HiDotsVertical />
             </label>
-            <ul
-              tabIndex={0}
-              className="dropdown-content menu p-0 shadow bg-base-100 rounded-box w-40"
-            >
+            <ul className="dropdown-content menu p-0 shadow bg-base-100 rounded-box w-40">
               <li>
-                <button
-                  onClick={() => {
-                    clearAllMessages();
-                    // Remove focus to close dropdown immediately
-                    document.activeElement.blur();
-                  }}
-                  className="text-error"
-                >
+                <button onClick={clearAllMessages} className="text-error">
                   Clear all chat
                 </button>
               </li>
@@ -144,66 +130,63 @@ export default function AIChatPage() {
           </div>
         </div>
 
-        {/* Chat Area */}
-        <div className="flex-1 rounded-xl overflow-y-auto space-y-3 h-[calc(60vh-75px)] p-0 sm:p-8">
+        {/* CHAT AREA */}
+        <div className="flex-1 rounded-xl space-y-3 h-[calc(60vh-75px)] p-0 sm:p-8">
           {messages.map((message) => (
             <div
-              key={message.id}
+              key={message._id}
               className={`flex ${
                 message.sender === "user" ? "justify-end" : "justify-start"
               } relative group`}
             >
-              {/* Bubble */}
               <div
                 className={`px-6 py-2 rounded-xl max-w-xs lg:max-w-md break-words ${
                   message.deleted
-                    ? "bg-base-200 text-base-400 italic" // gray background + italic text
+                    ? "bg-base-200 italic"
                     : message.sender === "user"
                     ? "bg-primary text-primary-content rounded-br-none"
                     : "bg-base-300 text-base-content rounded-bl-none"
                 }`}
               >
-                <p className="whitespace-pre-wrap leading-relaxed">
-                  {message.text}
-                </p>
+                <p className="whitespace-pre-wrap">{message.text}</p>
               </div>
 
-              {/* Menu outside bubble */}
-              <div
-                className={`absolute ${
-                  message.deleted ? "bottom-2" : "bottom-0"
-                } ${
-                  message.sender === "user" ? "right-1" : "left-1"
-                } hidden group-hover:block`}
-                style={{ zIndex: 50 }}
-              >
+              {message._id !== "welcome" && (
                 <div
-                  className={`dropdown ${
-                    message.sender === "ai" ? "dropdown-start" : "dropdown-end"
-                  }`}
+                  className={`absolute z-10 bottom-0 ${
+                    message.sender === "user" ? "right-1" : "left-1"
+                  } hidden group-hover:block`}
                 >
-                  <label tabIndex={0} className="cursor-pointer">
-                    <HiDotsVertical className="text-sm opacity-70 hover:opacity-100" />
-                  </label>
-                  <ul
-                    tabIndex={0}
-                    className="dropdown-content menu p-0 shadow bg-base-100 text-error rounded-box w-32"
+                  <div
+                    className={`dropdown ${
+                      message.sender === "ai"
+                        ? "dropdown-start"
+                        : "dropdown-end"
+                    }`}
                   >
-                    <li>
-                      <button onClick={() => clearMessage(message.id)}>
-                        Delete
-                      </button>
-                    </li>
-                  </ul>
+                    <label tabIndex={0} className="cursor-pointer">
+                      <HiDotsVertical />
+                    </label>
+                    <ul
+                      tabIndex={0}
+                      className="dropdown-content menu p-0 shadow bg-base-100 text-error rounded-box w-32"
+                    >
+                      <li>
+                        <button onClick={() => clearMessage(message._id)}>
+                          Delete
+                        </button>
+                      </li>
+                    </ul>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           ))}
 
-          {/* Loading */}
+          {/* AI LOADER */}
           {chatMutation.isPending && (
             <div className="flex justify-start">
-              <div className="flex gap-2 px-4 py-2 bg-base-300 rounded-xl rounded-bl-none">
+              <div className="px-4 py-2 bg-base-300 rounded-xl">
                 <span className="loading loading-dots loading-sm"></span>
               </div>
             </div>
@@ -212,12 +195,8 @@ export default function AIChatPage() {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input */}
-        <form
-          noValidate
-          onSubmit={handleSendMessage}
-          className="flex gap-2 mt-6 p-3"
-        >
+        {/* INPUT */}
+        <form onSubmit={handleSendMessage} className="flex gap-2 mt-6 p-3">
           <FormInput
             containerClassName="flex-1"
             placeholder="Ask anything..."
@@ -225,11 +204,9 @@ export default function AIChatPage() {
             onChange={(e) => setInputValue(e.target.value)}
             disabled={chatMutation.isPending}
           />
-
           <PrimaryButton type="submit" loading={chatMutation.isPending}>
             <FiSend className="text-xl" />
           </PrimaryButton>
-          {/* <PrimaryButton onClick={clearChat}>Clear</PrimaryButton> */}
         </form>
       </div>
     </div>
