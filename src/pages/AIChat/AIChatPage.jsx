@@ -131,7 +131,7 @@ export default function AIChatPage() {
         </div>
 
         {/* CHAT AREA */}
-        <div className="flex-1 rounded-xl space-y-3 h-[calc(60vh-75px)] p-0 sm:p-8">
+        <div className="flex-1 rounded-xl space-y-3 h-[calc(60vh-75px)] p-0 sm:p-8 overflow-y-auto overflow-x-hidden">
           {messages.map((message) => (
             <div
               key={message._id}

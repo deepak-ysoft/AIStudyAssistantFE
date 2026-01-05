@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { subjectsApi } from "../../api/subjectsApi";
+import { aiApi } from "../../api/aiApi";
 import { MdBook } from "react-icons/md";
 import { FiEdit2, FiEye, FiTrash2 } from "react-icons/fi";
 import ConfirmDeleteModal from "../../components/ConfirmDeleteModal";
@@ -10,6 +11,7 @@ import AppModal from "../../components/AppModal";
 import FormInput from "../../components/FormInput";
 import PageHeader from "../../components/PageHeader";
 import { useToast } from "../../components/ToastContext";
+import { FaRobot } from "react-icons/fa6";
 
 export default function SubjectsPage() {
   const [showModal, setShowModal] = useState(false);
@@ -26,6 +28,11 @@ export default function SubjectsPage() {
     name: "",
     description: "",
   });
+  const [showAIModal, setShowAIModal] = useState(false);
+  const [aiPrompt, setAiPrompt] = useState("");
+  const [difficulty, setDifficulty] = useState("beginner");
+  const [limit, setLimit] = useState(5);
+  const [regenerate, setRegenerate] = useState(false);
 
   /* ---------------- QUERY ---------------- */
 
@@ -91,6 +98,21 @@ export default function SubjectsPage() {
     },
   });
 
+  const generateNotesMutation = useMutation({
+    mutationFn: aiApi.generateNotes,
+    onSuccess: (res) => {
+      showToast(res.data.message, "success");
+      setShowAIModal(false);
+      setAiPrompt("");
+      refetch(); // refetch notes
+    },
+    onError: (err) => {
+      showToast(
+        err?.response?.data?.message || "Failed to generate notes",
+        "error"
+      );
+    },
+  });
   /* ---------------- HELPERS ---------------- */
 
   const validate = () => {
@@ -236,10 +258,20 @@ export default function SubjectsPage() {
                       </button>
                     </div>
                   </h2>
-
                   <p className="mt-3 text-sm text-base-content/70 line-clamp-3">
                     {subject.description || "No description provided"}
                   </p>
+                  <PrimaryButton
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedSubject(subject);
+                      setShowAIModal(true);
+                    }}
+                    className="btn ml-auto mt-4 flex items-center gap-2"
+                  >
+                    <FaRobot className="text-xl text-info" /> Generate Notes
+                    with AI
+                  </PrimaryButton>
                 </div>
               </div>
             ))}
@@ -332,6 +364,91 @@ export default function SubjectsPage() {
           </div>
         </div>
       </AppModal>
+
+      {/* AI NOTES MODAL */}
+      <AppModal
+        open={showAIModal}
+        title="Generate AI Notes"
+        onClose={() => setShowAIModal(false)}
+      >
+        <form
+          className="space-y-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+
+            generateNotesMutation.mutate({
+              subjectId: selectedSubject._id,
+              prompt: aiPrompt,
+              difficulty,
+              limit,
+              regenerate,
+            });
+          }}
+        >
+          <FormInput
+            label="Topic / Prompt"
+            placeholder="e.g. React, React Components, Hooks"
+            value={aiPrompt}
+            onChange={(e) => setAiPrompt(e.target.value)}
+            required
+          />
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="label">Difficulty</label>
+              <select
+                className="select select-bordered w-full"
+                value={difficulty}
+                onChange={(e) => setDifficulty(e.target.value)}
+              >
+                <option value="beginner">Beginner</option>
+                <option value="intermediate">Intermediate</option>
+                <option value="advanced">Advanced</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="label">Number of Notes</label>
+              <input
+                type="number"
+                min={1}
+                max={10}
+                className="input input-bordered w-full"
+                value={limit}
+                onChange={(e) => setLimit(Number(e.target.value))}
+              />
+            </div>
+          </div>
+
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              className="checkbox checkbox-warning"
+              checked={regenerate}
+              onChange={(e) => setRegenerate(e.target.checked)}
+            />
+            <span className="text-sm">Regenerate (delete old AI notes)</span>
+          </label>
+
+          <div className="flex justify-end gap-2 pt-3">
+            <button
+              type="button"
+              className="btn"
+              onClick={() => setShowAIModal(false)}
+            >
+              Cancel
+            </button>
+
+            <PrimaryButton
+              type="submit"
+              loading={generateNotesMutation.isPending}
+            >
+              Generate Notes
+            </PrimaryButton>
+          </div>
+        </form>
+      </AppModal>
+
       {/* DELETE CONFIRM */}
       <ConfirmDeleteModal
         open={showDeleteModal}

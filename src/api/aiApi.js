@@ -2,6 +2,7 @@ import axiosInstance from "./axiosInstance";
 
 export const aiApi = {
   chat: (payload) => axiosInstance.post("/ai/chat", payload),
+  generateNotes: (payload) => axiosInstance.post("/ai/notes", payload),
   generateFlashcards: (id) => axiosInstance.post(`/ai/${id}/flashcards`),
   generateSummary: (id) => axiosInstance.post(`/ai/${id}/summarize`),
   generateMCQs: (id) => axiosInstance.post(`/ai/${id}/mcqs-from-notes`),
