@@ -11,7 +11,7 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "../../components/ToastContext";
 
 export default function SettingsPage() {
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const [errors, setErrors] = useState({});
   const [mailErrors, setMailErrors] = useState({});
   const navigate = useNavigate();
@@ -71,6 +71,7 @@ export default function SettingsPage() {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+
   const validateEmail = () => {
     const newErrors = {};
 
@@ -78,7 +79,7 @@ export default function SettingsPage() {
       newErrors.email = "Email is required";
     } else if (!EMAIL_REGEX.test(newEmail)) {
       newErrors.email = "Enter a valid email address";
-    } else if (newEmail === useAuth().user?.email) {
+    } else if (newEmail === user?.email) {
       newErrors.email = "New email must be different from current email";
     }
 

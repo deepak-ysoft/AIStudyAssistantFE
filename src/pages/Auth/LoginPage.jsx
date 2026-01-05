@@ -17,25 +17,37 @@ export default function LoginPage() {
     mutationFn: (data) => authApi.login(data),
 
     onSuccess: (response) => {
-      if (response.data.success) {
-        const { user, token } = response.data.data;
-        login(user, token);
-        navigate("/dashboard", { replace: true });
-      }
+      const { user, token } = response.data.data;
+      login(user, token);
+      navigate("/dashboard", { replace: true });
     },
 
-    onError: (err) => {
-      logout();
-
+    onError: async (err) => {
       const message = err.response?.data?.message;
+
+      if (message === "EMAIL_NOT_VERIFIED") {
+        try {
+          await resendMutation.mutateAsync(email);
+          setError(
+            "Email not verified. A new verification email has been sent. Please check your inbox."
+          );
+        } catch {
+          setError("Email not verified. Failed to resend verification email.");
+        }
+        return;
+      }
 
       if (message === "ACCOUNT_DELETED") {
         navigate(`/restore-account?email=${encodeURIComponent(email)}`);
         return;
       }
 
-      setError(message || "Invalid email or password");
+      setError("Invalid email or password");
     },
+  });
+
+  const resendMutation = useMutation({
+    mutationFn: (email) => authApi.resendVerificationEmail(email),
   });
 
   const handleSubmit = (e) => {

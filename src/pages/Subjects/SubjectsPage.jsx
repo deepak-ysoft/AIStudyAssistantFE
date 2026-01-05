@@ -12,6 +12,7 @@ import FormInput from "../../components/FormInput";
 import PageHeader from "../../components/PageHeader";
 import { useToast } from "../../components/ToastContext";
 import { FaRobot } from "react-icons/fa6";
+import { FiMoreVertical } from "react-icons/fi";
 
 export default function SubjectsPage() {
   const [showModal, setShowModal] = useState(false);
@@ -19,6 +20,8 @@ export default function SubjectsPage() {
   const [detailsSubject, setDetailsSubject] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedSubject, setSelectedSubject] = useState(null);
+  const [selectedSubjects, setSelectedSubjects] = useState([]);
+  const [selectionMode, setSelectionMode] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
@@ -178,6 +181,33 @@ export default function SubjectsPage() {
     setDetailsSubject(null);
   };
 
+  const toggleSubjectSelection = (SubjectsId) => {
+    setSelectedSubjects((prev) =>
+      prev.includes(SubjectsId)
+        ? prev.filter((id) => id !== SubjectsId)
+        : [...prev, SubjectsId]
+    );
+  };
+
+  const exitSelectionMode = () => {
+    setSelectionMode(false);
+    setSelectedSubjects([]);
+  };
+
+  const isSelected = (SubjectsId) => selectedSubjects.includes(SubjectsId);
+
+  const clearSelection = () => setSelectedSubjects([]);
+
+  const handleBulkDelete = async () => {
+    for (const id of selectedSubjects) {
+      await deleteMutation.mutateAsync(id);
+    }
+
+    clearSelection();
+    setShowDeleteModal(false);
+    exitSelectionMode();
+  };
+
   /* ---------------- UI ---------------- */
 
   return (
@@ -197,6 +227,27 @@ export default function SubjectsPage() {
       </PageHeader>
       {/* LIST */}
       <div className="rounded-3xl border border-base-300 bg-gradient-to-br from-primary/10 via-base-100 to-secondary/10 p-2 ">
+        {selectionMode && (
+          <div className="mb-4 flex items-center justify-between rounded-2xl bg-warning/10 p-4">
+            <span className="text-sm font-medium">
+              {selectedSubjects.length} selected
+            </span>
+
+            <div className="flex gap-2">
+              <button className="btn btn-sm" onClick={exitSelectionMode}>
+                Cancel
+              </button>
+
+              <button
+                className="btn btn-sm bg-error hover:bg-error/90 text-error-content px-8 shadow-lg shadow-error/30"
+                disabled={!selectedSubjects.length}
+                onClick={() => setShowDeleteModal(true)}
+              >
+                Delete Selected
+              </button>
+            </div>
+          </div>
+        )}
         {isLoading ? (
           <div className="flex justify-center py-20">
             <span className="loading loading-spinner loading-lg" />
@@ -205,9 +256,9 @@ export default function SubjectsPage() {
           <div
             className={`${
               subjects.length >= 3
-                ? "grid grid-cols-1 md:grid-cols-2  lg:grid-cols-3"
+                ? "grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3"
                 : subjects.length === 2
-                ? "grid grid-cols-1 md:grid-cols-2"
+                ? "grid grid-cols-1 lg:grid-cols-2"
                 : subjects.length === 1
                 ? "grid grid-cols-1"
                 : ""
@@ -223,39 +274,79 @@ export default function SubjectsPage() {
                 <div className="pointer-events-none absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-primary to-secondary" />
 
                 <div className="p-6 pl-8">
-                  <h2 className="text-xl font-semibold flex flex-col xl:flex-row justify-between items-start xl:items-center gap-3">
-                    <div className="order-2 xl:order-1 ">{subject.name}</div>
-                    <div className="order-1 xl:order-2 flex gap-2 transition">
+                  <h2 className="text-xl font-semibold flex justify-between items-center gap-3">
+                    <div className="flex items-center gap-3">
+                      {selectionMode && (
+                        <input
+                          type="checkbox"
+                          className="checkbox checkbox-primary"
+                          checked={isSelected(subject._id)}
+                          onChange={() => toggleSubjectSelection(subject._id)}
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                      )}
+                      <span>{subject.name}</span>
+                    </div>
+                    <div className="dropdown dropdown-end">
                       <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          openEditModal(subject);
-                        }}
-                        className="btn btn-circle btn-sm bg-primary/35 hover:bg-base-300"
+                        tabIndex={0}
+                        className="btn btn-circle btn-sm bg-primary/20 hover:bg-base-300"
+                        onClick={(e) => e.stopPropagation()}
                       >
-                        <FiEdit2 className="text-primary" size={16} />
+                        <FiMoreVertical size={16} />
                       </button>
+                      <ul
+                        tabIndex={0}
+                        className="dropdown-content z-[10] menu p-2 shadow bg-base-100 rounded-box w-44"
+                      >
+                        <li>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openEditModal(subject);
+                            }}
+                            className=" px-4 py-1.5 text-primary/80 hover:text-primary"
+                          >
+                            <FiEdit2 size={14} /> Edit
+                          </button>
+                        </li>
 
-                      <button
-                        className="btn btn-circle btn-sm bg-primary/35 hover:bg-base-300"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          openDetailsModal(subject);
-                        }}
-                      >
-                        <FiEye className="text-info" size={16} />
-                      </button>
-
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedSubject(subject);
-                          setShowDeleteModal(true);
-                        }}
-                        className="btn btn-circle btn-sm bg-primary/35 hover:bg-base-300"
-                      >
-                        <FiTrash2 className="text-error" size={16} />
-                      </button>
+                        <li>
+                          <button
+                            className=" px-4 py-1.5 text-info/80 hover:text-info"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openDetailsModal(subject);
+                            }}
+                          >
+                            <FiEye size={14} /> View
+                          </button>
+                        </li>
+                        <li className="pb-1">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedSubject(subject);
+                              setShowDeleteModal(true);
+                            }}
+                            className=" px-4 py-1.5 text-error/80 hover:text-error"
+                          >
+                            <FiTrash2 size={14} /> Delete
+                          </button>
+                        </li>
+                        <li className="border-t pt-1">
+                          <button
+                            className=" px-4 py-1.5 text-primary/80 hover:text-primary"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectionMode(true);
+                              toggleSubjectSelection(subject._id);
+                            }}
+                          >
+                            Select
+                          </button>
+                        </li>
+                      </ul>
                     </div>
                   </h2>
                   <p className="mt-3 text-sm text-base-content/70 line-clamp-3">
@@ -267,10 +358,9 @@ export default function SubjectsPage() {
                       setSelectedSubject(subject);
                       setShowAIModal(true);
                     }}
-                    className="btn ml-auto mt-4 flex items-center gap-2"
+                    className="btn ml-auto px-6 mt-4 flex items-center gap-2"
                   >
                     <FaRobot className="text-xl text-info" /> Generate Notes
-                    with AI
                   </PrimaryButton>
                 </div>
               </div>
@@ -339,7 +429,6 @@ export default function SubjectsPage() {
           </div>
         </form>
       </AppModal>
-
       {/* Details Modal */}
       <AppModal
         open={showDetailsModal}
@@ -364,7 +453,6 @@ export default function SubjectsPage() {
           </div>
         </div>
       </AppModal>
-
       {/* AI NOTES MODAL */}
       <AppModal
         open={showAIModal}
@@ -448,15 +536,36 @@ export default function SubjectsPage() {
           </div>
         </form>
       </AppModal>
-
       {/* DELETE CONFIRM */}
-      <ConfirmDeleteModal
+      {/* <ConfirmDeleteModal
         open={showDeleteModal}
         title="Delete Subject"
         message={`Are you sure you want to delete \"${selectedSubject?.name}\"?`}
         loading={deleteMutation.isPending}
         onCancel={() => setShowDeleteModal(false)}
         onConfirm={() => deleteMutation.mutate(selectedSubject._id)}
+      /> */}
+      {/* DELETE CONFIRM MODAL */}
+      <ConfirmDeleteModal
+        open={showDeleteModal}
+        title={
+          selectedSubjects.length > 1 ? "Delete Subjects" : "Delete Subject"
+        }
+        message={
+          selectedSubjects.length > 1
+            ? `Are you sure you want to delete ${selectedSubjects.length} subjects?`
+            : `Are you sure you want to delete "${selectedSubject?.title}"?`
+        }
+        loading={deleteMutation.isPending}
+        onCancel={() => {
+          setShowDeleteModal(false);
+          setSelectedSubject(null);
+        }}
+        onConfirm={
+          selectedSubjects.length > 1
+            ? handleBulkDelete
+            : () => deleteMutation.mutate(selectedSubject._id)
+        }
       />
     </div>
   );

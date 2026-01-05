@@ -39,7 +39,7 @@ export default function Dashboard() {
 
       const a = document.createElement("a");
       a.href = url;
-      a.download = `${reportType}-learning-report.pdf`;
+      a.download = `${reportType}-learning-report-${Date.now()}.pdf`;
       a.click();
 
       window.URL.revokeObjectURL(url);
@@ -158,13 +158,13 @@ export default function Dashboard() {
       <div className="card bg-primary/35 border shadow-sm">
         <div className="card-body space-y-6">
           {/* Header */}
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-center justify-between">
             <h2 className="card-title flex items-center gap-2">
               <MdAssessment className="text-primary text-3xl" />
               <span>Performance Reports</span>
             </h2>
 
-            <div className="flex gap-2">
+            <div className="flex gap-2 mt-4 sm:mt-0">
               {["weekly", "monthly"].map((type) => (
                 <PrimaryButton
                   key={type}
@@ -180,7 +180,7 @@ export default function Dashboard() {
           </div>
 
           {/* Report Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {[
               ["Study Hours", `${report.studyHours || 0}h`],
               ["Topics Covered", report.topicsCovered || 0],
@@ -189,7 +189,7 @@ export default function Dashboard() {
             ].map(([label, value]) => (
               <div key={label} className="card bg-base-100 shadow">
                 <div className="card-body">
-                  <p className="text-sm">{label}</p>
+                  <p className="text-sm wor">{label}</p>
                   <p className="text-2xl font-bold">{value}</p>
                 </div>
               </div>
@@ -207,14 +207,24 @@ export default function Dashboard() {
             ) : (
               Object.entries(report.subjectPerformance).map(
                 ([subject, score]) => (
-                  <div key={subject} className="flex items-center gap-3 mb-2">
-                    <p className="w-32 text-sm">{subject}</p>
+                  <div
+                    key={subject}
+                    className="grid grid-cols-[1fr_3fr_auto] items-center gap-4 mb-3"
+                  >
+                    {/* SUBJECT */}
+                    <div className="text-sm font-normal truncate">
+                      {subject}
+                    </div>
+
+                    {/* PROGRESS BAR */}
                     <progress
-                      className="progress progress-primary flex-1"
+                      className="progress progress-primary w-full"
                       value={score}
                       max="100"
                     />
-                    <span className="text-xs">{score}%</span>
+
+                    {/* PERCENT */}
+                    <span className="text-xs font-semibold">{score}%</span>
                   </div>
                 )
               )

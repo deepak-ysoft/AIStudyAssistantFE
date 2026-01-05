@@ -14,6 +14,7 @@ export default function MainLayout() {
 
         <main className="flex-1 max-h-[calc(100vh-70px)] overflow-y-auto overflow-x-hidden">
           <div className="px-4 md:px-6 lg:px-8 py-6">
+            <div className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 bg-primary/20 blur-3xl" />
             <Outlet />
           </div>
         </main>

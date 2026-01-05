@@ -14,10 +14,13 @@ import { MdOutlineQuiz } from "react-icons/md";
 import PageHeader from "../../../components/PageHeader";
 import { MdOutlineSummarize } from "react-icons/md";
 import { useToast } from "../../../components/ToastContext";
+import { FiMoreVertical } from "react-icons/fi";
 
 export default function SubjectNotesPage({ subjectId }) {
   const [showModal, setShowModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [selectedNotes, setSelectedNotes] = useState([]);
+  const [selectionMode, setSelectionMode] = useState(false);
   const [detailsNote, setDetailsNote] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedNote, setSelectedNote] = useState(null);
@@ -212,6 +215,33 @@ export default function SubjectNotesPage({ subjectId }) {
     setDetailsNote(null);
   };
 
+  const toggleNoteSelection = (noteId) => {
+    setSelectedNotes((prev) =>
+      prev.includes(noteId)
+        ? prev.filter((id) => id !== noteId)
+        : [...prev, noteId]
+    );
+  };
+
+  const exitSelectionMode = () => {
+    setSelectionMode(false);
+    setSelectedNotes([]);
+  };
+
+  const isSelected = (noteId) => selectedNotes.includes(noteId);
+
+  const clearSelection = () => setSelectedNotes([]);
+
+  const handleBulkDelete = async () => {
+    for (const id of selectedNotes) {
+      await deleteMutation.mutateAsync(id);
+    }
+
+    clearSelection();
+    setShowDeleteModal(false);
+    exitSelectionMode();
+  };
+
   /* ------------------ UI ------------------ */
 
   return (
@@ -232,6 +262,28 @@ export default function SubjectNotesPage({ subjectId }) {
       </PageHeader>
       {/* LIST */}
       <div className="rounded-3xl border border-base-300 bg-gradient-to-br from-primary/10 via-base-100 to-secondary/10 p-2 ">
+        {selectionMode && (
+          <div className="mb-4 flex items-center justify-between rounded-2xl bg-warning/10 p-4">
+            <span className="text-sm font-medium">
+              {selectedNotes.length} selected
+            </span>
+
+            <div className="flex gap-2">
+              <button className="btn btn-sm" onClick={exitSelectionMode}>
+                Cancel
+              </button>
+
+              <button
+                className="btn btn-sm bg-error hover:bg-error/90 text-error-content px-8 shadow-lg shadow-error/30"
+                disabled={!selectedNotes.length}
+                onClick={() => setShowDeleteModal(true)}
+              >
+                Delete Selected
+              </button>
+            </div>
+          </div>
+        )}
+
         {isLoading ? (
           <div className="flex justify-center py-20">
             <span className="loading loading-spinner loading-lg" />
@@ -253,35 +305,76 @@ export default function SubjectNotesPage({ subjectId }) {
                 <div className="pointer-events-none absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-primary to-secondary" />
 
                 <div className="p-6 pl-8">
-                  <h2 className="text-xl font-semibold flex flex-col xl:flex-row justify-between items-start xl:items-center gap-3">
-                    {/* Title */}
-                    <span className="order-2 xl:order-1">{note.title}</span>
+                  <h2 className="text-xl font-semibold flex justify-between items-center gap-3">
+                    <div className="flex items-center gap-3">
+                      {selectionMode && (
+                        <input
+                          type="checkbox"
+                          className="checkbox checkbox-primary"
+                          checked={isSelected(note._id)}
+                          onChange={() => toggleNoteSelection(note._id)}
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                      )}
+                      <span>{note.title}</span>
+                    </div>
 
                     {/* Actions */}
-                    <div className="order-1 xl:order-2 flex gap-3 transition">
+                    <div className="dropdown dropdown-end">
                       <button
-                        className="btn btn-circle btn-sm bg-primary/35 hover:bg-base-300"
-                        onClick={() => openEditModal(note)}
+                        tabIndex={0}
+                        className="btn btn-circle btn-sm bg-primary/20 hover:bg-base-300"
+                        onClick={(e) => e.stopPropagation()}
                       >
-                        <FiEdit2 className="text-primary" size={16} />
+                        <FiMoreVertical size={16} />
                       </button>
 
-                      <button
-                        className="btn btn-circle btn-sm bg-primary/35 hover:bg-base-300"
-                        onClick={() => openDetailsModal(note)}
+                      <ul
+                        tabIndex={0}
+                        className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-44"
                       >
-                        <FiEye className="text-info" size={16} />
-                      </button>
+                        <li>
+                          <button
+                            className="text-primary/80 hover:text-primary"
+                            onClick={() => openEditModal(note)}
+                          >
+                            <FiEdit2 size={14} /> Edit
+                          </button>
+                        </li>
 
-                      <button
-                        className="btn btn-circle btn-sm bg-primary/35 hover:bg-base-300"
-                        onClick={() => {
-                          setSelectedNote(note);
-                          setShowDeleteModal(true);
-                        }}
-                      >
-                        <FiTrash2 className="text-error" size={16} />
-                      </button>
+                        <li>
+                          <button
+                            className="text-info/80 hover:text-info"
+                            onClick={() => openDetailsModal(note)}
+                          >
+                            <FiEye size={14} /> View
+                          </button>
+                        </li>
+
+                        <li className="pb-2">
+                          <button
+                            className="text-error/80 hover:text-error"
+                            onClick={() => {
+                              setSelectedNote(note);
+                              setShowDeleteModal(true);
+                            }}
+                          >
+                            <FiTrash2 size={14} /> Delete
+                          </button>
+                        </li>
+
+                        <li className="border-t  pt-2">
+                          <button
+                            className="text-primary/80 hover:text-primary"
+                            onClick={() => {
+                              setSelectionMode(true);
+                              toggleNoteSelection(note._id);
+                            }}
+                          >
+                            Select
+                          </button>
+                        </li>
+                      </ul>
                     </div>
                   </h2>
 
@@ -450,11 +543,22 @@ export default function SubjectNotesPage({ subjectId }) {
       {/* DELETE CONFIRM MODAL */}
       <ConfirmDeleteModal
         open={showDeleteModal}
-        title="Delete Note"
-        message={`Are you sure you want to delete "${selectedNote?.title}"?`}
+        title={selectedNotes.length > 1 ? "Delete Notes" : "Delete Note"}
+        message={
+          selectedNotes.length > 1
+            ? `Are you sure you want to delete ${selectedNotes.length} notes?`
+            : `Are you sure you want to delete "${selectedNote?.title}"?`
+        }
         loading={deleteMutation.isPending}
-        onCancel={() => setShowDeleteModal(false)}
-        onConfirm={() => deleteMutation.mutate(selectedNote._id)}
+        onCancel={() => {
+          setShowDeleteModal(false);
+          setSelectedNote(null);
+        }}
+        onConfirm={
+          selectedNotes.length > 1
+            ? handleBulkDelete
+            : () => deleteMutation.mutate(selectedNote._id)
+        }
       />
     </div>
   );

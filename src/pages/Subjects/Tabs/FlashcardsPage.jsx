@@ -9,6 +9,7 @@ import FormInput from "../../../components/FormInput";
 import PageHeader from "../../../components/PageHeader";
 import ConfirmDeleteModal from "../../../components/ConfirmDeleteModal";
 import { useToast } from "../../../components/ToastContext";
+import { FiMoreVertical } from "react-icons/fi";
 
 export default function SubjectFlashcardsPage({ subjectId }) {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -19,6 +20,9 @@ export default function SubjectFlashcardsPage({ subjectId }) {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [errors, setErrors] = useState({});
   const { showToast } = useToast();
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedCards, setSelectedCards] = useState([]);
+
   const [formData, setFormData] = useState({
     question: "",
     answer: "",
@@ -182,6 +186,25 @@ export default function SubjectFlashcardsPage({ subjectId }) {
     reviewMutation.mutate({ id: currentCard._id, isCorrect: correct });
   };
 
+  const toggleCardSelection = (id) => {
+    setSelectedCards((prev) =>
+      prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]
+    );
+  };
+
+  const exitSelectionMode = () => {
+    setSelectionMode(false);
+    setSelectedCards([]);
+  };
+
+  const handleBulkDelete = async () => {
+    for (const id of selectedCards) {
+      await deleteMutation.mutateAsync(id);
+    }
+
+    exitSelectionMode();
+  };
+
   /* ---------------- UI ---------------- */
 
   return (
@@ -190,7 +213,7 @@ export default function SubjectFlashcardsPage({ subjectId }) {
       <PageHeader
         icon={MdCardGiftcard}
         title="Flashcards"
-        content="  Learn faster with interactive flashcards"
+        content="Learn faster with interactive flashcards"
       >
         <PrimaryButton
           onClick={openCreateModal}
@@ -199,7 +222,6 @@ export default function SubjectFlashcardsPage({ subjectId }) {
           + New Card
         </PrimaryButton>
       </PageHeader>
-      <div className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 bg-primary/20 blur-3xl" />
 
       {/* CONTENT */}
       <div className="rounded-3xl border border-base-300 bg-gradient-to-br from-primary/10 via-base-100 to-secondary/10 p-2 ">
@@ -210,85 +232,165 @@ export default function SubjectFlashcardsPage({ subjectId }) {
         ) : flashcards.length ? (
           <div className="space-y-8 p-1 sm:p-6">
             {/* FLASHCARD */}
-            <div
-              className="relative mx-auto cursor-pointer"
-              onClick={() => setIsFlipped((p) => !p)}
-            >
-              <div className="rounded-3xl bg-gradient-to-br from-primary to-secondary p-10 shadow-xl min-h-[260px] flex items-center justify-center">
-                <div className="text-center text-base-100">
-                  <p className="text-sm opacity-80 mb-4">
-                    {isFlipped ? "Answer" : "Question"} • {currentIndex + 1} /{" "}
-                    {flashcards.length}
-                  </p>
-                  <p className="text-2xl font-semibold">
-                    {isFlipped ? currentCard.answer : currentCard.question}
-                  </p>
+            {!selectionMode && (
+              <>
+                {" "}
+                <div
+                  className="relative mx-auto cursor-pointer"
+                  onClick={() => setIsFlipped((p) => !p)}
+                >
+                  <div className="rounded-3xl bg-gradient-to-br from-primary to-secondary p-10 shadow-xl min-h-[260px] flex items-center justify-center">
+                    <div className="text-center text-base-100">
+                      <p className="text-sm opacity-80 mb-4">
+                        {isFlipped ? "Answer" : "Question"} • {currentIndex + 1}{" "}
+                        / {flashcards.length}
+                      </p>
+                      <p className="text-2xl font-semibold">
+                        {isFlipped ? currentCard.answer : currentCard.question}
+                      </p>
 
-                  <p className="mt-6 text-xs opacity-60">Tap to flip</p>
+                      <p className="mt-6 text-xs opacity-60">Tap to flip</p>
+                    </div>
+                  </div>
+                  <div
+                    className="absolute top-4 right-4 dropdown dropdown-end"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <button className="btn btn-circle btn-sm bg-primary/20 hover:bg-base-300">
+                      <FiMoreVertical />
+                    </button>
+
+                    <ul className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-44">
+                      <li>
+                        <button
+                          className="text-primary/80 hover:text-primary"
+                          onClick={() => openEditModal(currentCard)}
+                        >
+                          <FiEdit2 size={14} /> Edit
+                        </button>
+                      </li>
+
+                      <li className="pb-1">
+                        <button
+                          className="text-error/80 hover:text-error"
+                          onClick={() => {
+                            setSelectedCard(currentCard);
+                            setShowDeleteModal(true);
+                          }}
+                        >
+                          <FiTrash2 size={14} /> Delete
+                        </button>
+                      </li>
+
+                      <li className="border-t pt-1">
+                        <button
+                          className="text-primary/80 hover:text-primary"
+                          onClick={() => {
+                            setSelectionMode(true);
+                            toggleCardSelection(currentCard._id);
+                          }}
+                        >
+                          Select cards
+                        </button>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+                {/* REVIEW ACTIONS */}
+                <div className="grid grid-cols-2 gap-4 max-w-md mx-auto">
+                  <PrimaryButton
+                    className="btn bg-primary/50 hover:bg-primary/70"
+                    onClick={() => handleMarkLearned(true)}
+                  >
+                    {currentCard.correctCount > 0 ? (
+                      <p>{currentCard.correctCount}</p>
+                    ) : null}{" "}
+                    Mark as Learned
+                  </PrimaryButton>
+
+                  <PrimaryButton
+                    className="btn bg-secondary/50  hover:bg-secondary/70"
+                    onClick={() => handleMarkLearned(false)}
+                  >
+                    {currentCard.wrongCount > 0 ? (
+                      <p>{currentCard.wrongCount}</p>
+                    ) : null}{" "}
+                    Wrong
+                  </PrimaryButton>
+                </div>
+                {/* NAVIGATION */}
+                <div className="flex justify-between items-center max-w-md mx-auto">
+                  <PrimaryButton
+                    onClick={handlePrevious}
+                    disabled={currentIndex === 0}
+                  >
+                    ← Previous
+                  </PrimaryButton>
+
+                  <PrimaryButton
+                    onClick={handleNext}
+                    disabled={currentIndex === flashcards.length - 1}
+                  >
+                    Next →
+                  </PrimaryButton>
+                </div>
+              </>
+            )}
+            {selectionMode && (
+              <div className="space-y-4">
+                {/* BULK BAR */}
+                <div className="flex items-center justify-between rounded-2xl bg-warning/10 p-4">
+                  <span className="text-sm font-medium">
+                    {selectedCards.length} selected
+                  </span>
+
+                  <div className="flex gap-2">
+                    <button className="btn btn-sm" onClick={exitSelectionMode}>
+                      Cancel
+                    </button>
+
+                    <button
+                      className="btn btn-sm btn-error"
+                      disabled={!selectedCards.length}
+                      onClick={() => setShowDeleteModal(true)}
+                    >
+                      Delete Selected
+                    </button>
+                  </div>
+                </div>
+
+                {/* CARD GRID */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {flashcards.map((card) => (
+                    <div
+                      key={card._id}
+                      className={`rounded-xl border bg-base-100 transition 
+    ${selectedCards.includes(card._id) ? "ring-2 ring-primary" : ""}
+  `}
+                    >
+                      <div className="flex items-center justify-between px-4 pt-4">
+                        <input
+                          type="checkbox"
+                          className="checkbox checkbox-primary"
+                          checked={selectedCards.includes(card._id)}
+                          onChange={() => toggleCardSelection(card._id)}
+                        />
+                      </div>
+
+                      {/* CONTENT */}
+                      <div className="p-4 pt-2">
+                        <p className="font-semibold mb-2 line-clamp-2">
+                          {card.question}
+                        </p>
+                        <p className="text-sm opacity-70 line-clamp-3">
+                          {card.answer}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
-
-              {/* EDIT ICON */}
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  openEditModal(currentCard);
-                }}
-                className="absolute top-4 right-4 btn btn-circle btn-sm bg-base-100/90 hover:bg-base-100"
-              >
-                <FiEdit2 className="text-primary" />
-              </button>
-              <button
-                className="absolute bottom-4 right-4 btn btn-circle btn-sm bg-base-100/90 hover:bg-base-100"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setSelectedCard(currentCard);
-                  setShowDeleteModal(true);
-                }}
-              >
-                <FiTrash2 className="text-error" size={16} />
-              </button>
-            </div>
-
-            {/* REVIEW ACTIONS */}
-            <div className="grid grid-cols-2 gap-4 max-w-md mx-auto">
-              <PrimaryButton
-                className="btn bg-primary/50 hover:bg-primary/70"
-                onClick={() => handleMarkLearned(true)}
-              >
-                {currentCard.correctCount > 0 ? (
-                  <p>{currentCard.correctCount}</p>
-                ) : null}{" "}
-                Mark as Learned
-              </PrimaryButton>
-
-              <PrimaryButton
-                className="btn bg-secondary/50  hover:bg-secondary/70"
-                onClick={() => handleMarkLearned(false)}
-              >
-                {currentCard.wrongCount > 0 ? (
-                  <p>{currentCard.wrongCount}</p>
-                ) : null}{" "}
-                Wrong
-              </PrimaryButton>
-            </div>
-
-            {/* NAVIGATION */}
-            <div className="flex justify-between items-center max-w-md mx-auto">
-              <PrimaryButton
-                onClick={handlePrevious}
-                disabled={currentIndex === 0}
-              >
-                ← Previous
-              </PrimaryButton>
-
-              <PrimaryButton
-                onClick={handleNext}
-                disabled={currentIndex === flashcards.length - 1}
-              >
-                Next →
-              </PrimaryButton>
-            </div>
+            )}
           </div>
         ) : (
           <div className="relative flex flex-col items-center justify-center py-32 text-center h-[calc(60vh-60px)]">
@@ -359,11 +461,21 @@ export default function SubjectFlashcardsPage({ subjectId }) {
 
       <ConfirmDeleteModal
         open={showDeleteModal}
-        title="Delete Card"
-        message={`Are you sure you want to delete?`}
+        title={
+          selectedCards.length > 1 ? "Delete Flashcards" : "Delete Flashcard"
+        }
+        message={
+          selectedCards.length > 1
+            ? `Are you sure you want to delete ${selectedCards.length} flashcards?`
+            : "Are you sure you want to delete this flashcard?"
+        }
         loading={deleteMutation.isPending}
         onCancel={() => setShowDeleteModal(false)}
-        onConfirm={() => deleteMutation.mutate(selectedCard._id)}
+        onConfirm={
+          selectedCards.length > 1
+            ? handleBulkDelete
+            : () => deleteMutation.mutate(selectedCard._id)
+        }
       />
     </div>
   );

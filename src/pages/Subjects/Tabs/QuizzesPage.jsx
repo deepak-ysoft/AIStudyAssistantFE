@@ -11,11 +11,14 @@ import PageHeader from "../../../components/PageHeader";
 import { FiCheckCircle, FiXCircle } from "react-icons/fi";
 import { RiTimerFill } from "react-icons/ri";
 import { useToast } from "../../../components/ToastContext";
+import { FiMoreVertical } from "react-icons/fi";
 
 export default function SubjectQuizzesPage({ subjectId }) {
   const [showModal, setShowModal] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedQuiz, setSelectedQuiz] = useState(null);
+  const [selectedQuizzes, setSelectedQuizzes] = useState([]);
+  const [selectionMode, setSelectionMode] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [quizModalOpen, setQuizModalOpen] = useState(false);
   const [activeQuiz, setActiveQuiz] = useState(null);
@@ -350,6 +353,33 @@ export default function SubjectQuizzesPage({ subjectId }) {
     setErrors(emptyErrors);
   };
 
+  const toggleQuizSelection = (quizId) => {
+    setSelectedQuizzes((prev) =>
+      prev.includes(quizId)
+        ? prev.filter((id) => id !== quizId)
+        : [...prev, quizId]
+    );
+  };
+
+  const exitSelectionMode = () => {
+    setSelectionMode(false);
+    setSelectedQuizzes([]);
+  };
+
+  const isSelected = (quizId) => selectedQuizzes.includes(quizId);
+
+  const clearSelection = () => setSelectedQuizzes([]);
+
+  const handleBulkDelete = async () => {
+    for (const id of selectedQuizzes) {
+      await deleteMutation.mutateAsync(id);
+    }
+
+    clearSelection();
+    setShowDeleteModal(false);
+    exitSelectionMode();
+  };
+
   /* ------------------ UI ------------------ */
 
   return (
@@ -367,9 +397,29 @@ export default function SubjectQuizzesPage({ subjectId }) {
           + New Quiz
         </PrimaryButton>
       </PageHeader>
-
       {/* LIST */}
       <div className="rounded-3xl border border-base-300 bg-gradient-to-br from-primary/10 via-base-100 to-secondary/10 p-2 ">
+        {selectionMode && (
+          <div className="mb-4 flex items-center justify-between rounded-2xl bg-warning/10 p-4">
+            <span className="text-sm font-medium">
+              {selectedQuizzes.length} selected
+            </span>
+
+            <div className="flex gap-2">
+              <button className="btn btn-sm" onClick={exitSelectionMode}>
+                Cancel
+              </button>
+
+              <button
+                className="btn btn-sm bg-error hover:bg-error/90 text-error-content px-8 shadow-lg shadow-error/30"
+                disabled={!selectedQuizzes.length}
+                onClick={() => setShowDeleteModal(true)}
+              >
+                Delete Selected
+              </button>
+            </div>
+          </div>
+        )}
         {isLoading ? (
           <div className="flex justify-center py-20">
             <span className="loading loading-spinner loading-lg" />
@@ -389,32 +439,75 @@ export default function SubjectQuizzesPage({ subjectId }) {
               >
                 <div className="pointer-events-none absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-primary to-secondary" />
                 <div className="p-6 pl-8">
-                  <h2 className="text-xl font-semibold flex flex-col xl:flex-row justify-between items-start xl:items-center gap-3">
-                    <div className="order-2 xl:order-1"> {quiz.title}</div>
-                    <div className="order-1 xl:order-2  flex  gap-3">
+                  <h2 className="text-xl font-semibold flex justify-between items-center gap-3">
+                    <div className="flex items-center gap-3">
+                      {selectionMode && (
+                        <input
+                          type="checkbox"
+                          className="checkbox checkbox-primary"
+                          checked={isSelected(quiz._id)}
+                          onChange={() => toggleQuizSelection(quiz._id)}
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                      )}
+                      <span>{quiz.title}</span>
+                    </div>
+
+                    <div className="dropdown dropdown-end">
                       <button
-                        className="btn btn-circle btn-sm bg-primary/35 hover:bg-base-300"
-                        onClick={() => startQuiz(quiz)}
+                        tabIndex={0}
+                        className="btn btn-circle btn-sm bg-primary/20 hover:bg-base-300"
+                        onClick={(e) => e.stopPropagation()}
                       >
-                        <FiPlay className="text-success" size={16} />
+                        <FiMoreVertical size={16} />
                       </button>
 
-                      <button
-                        className="btn btn-circle btn-sm bg-primary/35 hover:bg-base-300"
-                        onClick={() => openEditModal(quiz)}
+                      <ul
+                        tabIndex={0}
+                        className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-44"
                       >
-                        <FiEdit2 className="text-primary" size={16} />
-                      </button>
+                        <div className="flex justify-around">
+                          <li>
+                            <button
+                              className="text-primary/80 hover:text-primary"
+                              onClick={() => startQuiz(quiz)}
+                            >
+                              <FiPlay size={16} />
+                            </button>
+                          </li>
+                          <li>
+                            <button
+                              className="text-info/80 hover:text-info"
+                              onClick={() => openEditModal(quiz)}
+                            >
+                              <FiEdit2 size={14} />
+                            </button>
+                          </li>
+                          <li>
+                            <button
+                              className="text-error/80 hover:text-error"
+                              onClick={() => {
+                                setSelectedQuiz(quiz);
+                                setShowDeleteModal(true);
+                              }}
+                            >
+                              <FiTrash2 size={14} />
+                            </button>
+                          </li>
+                        </div>
 
-                      <button
-                        className="btn btn-circle btn-sm bg-primary/35 hover:bg-base-300"
-                        onClick={() => {
-                          setSelectedQuiz(quiz);
-                          setShowDeleteModal(true);
-                        }}
-                      >
-                        <FiTrash2 className="text-error" size={16} />
-                      </button>
+                        <li className="border-t  pt-2">
+                          <button
+                            className="text-primary/80 hover:text-primary"
+                            onClick={() => {
+                              setSelectionMode(true);
+                              toggleQuizSelection(quiz._id);
+                            }}
+                          >
+                            Select
+                          </button>
+                        </li>
+                      </ul>
                     </div>
                   </h2>
 
@@ -454,7 +547,6 @@ export default function SubjectQuizzesPage({ subjectId }) {
           </div>
         )}
       </div>
-
       {/* Start Quiz Modal */}
       <AppModal
         open={quizModalOpen}
@@ -643,7 +735,6 @@ export default function SubjectQuizzesPage({ subjectId }) {
           </div>
         )}
       </AppModal>
-
       {/* CREATE / EDIT MODAL */}
       <AppModal
         open={showModal}
@@ -803,7 +894,6 @@ export default function SubjectQuizzesPage({ subjectId }) {
           </div>
         </form>
       </AppModal>
-
       {/* DELETE CONFIRM */}
       <ConfirmDeleteModal
         open={showDeleteModal}
@@ -812,6 +902,25 @@ export default function SubjectQuizzesPage({ subjectId }) {
         loading={deleteMutation.isPending}
         onCancel={() => setShowDeleteModal(false)}
         onConfirm={() => deleteMutation.mutate(selectedQuiz._id)}
+      />
+      <ConfirmDeleteModal
+        open={showDeleteModal}
+        title={selectedQuizzes.length > 1 ? "Delete Quizs" : "Delete Quiz"}
+        message={
+          selectedQuizzes.length > 1
+            ? `Are you sure you want to delete ${selectedQuizzes.length} quiz?`
+            : `Are you sure you want to delete "${selectedQuiz?.title}"?`
+        }
+        loading={deleteMutation.isPending}
+        onCancel={() => {
+          setShowDeleteModal(false);
+          setSelectedQuiz(null);
+        }}
+        onConfirm={
+          selectedQuizzes.length > 1
+            ? handleBulkDelete
+            : () => deleteMutation.mutate(selectedQuiz._id)
+        }
       />
     </div>
   );
